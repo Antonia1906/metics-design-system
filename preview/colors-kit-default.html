@@ -1,0 +1,23 @@
+<!-- @dsCard group="Colors" -->
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:#14161B;padding:28px}
+  .row{display:flex;gap:14px}
+  .sw{flex:1;border-radius:14px;height:118px;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;border:1px solid rgba(0,0,0,.06)}
+  .name{font-weight:700;font-size:14px}
+  .hex{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;opacity:.85;margin-top:3px}
+  .on-dark .name,.on-dark .hex{color:#fff}
+  .cap{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8a8d92;margin-top:16px}
+</style></head>
+<body>
+  <div class="row">
+    <div class="sw on-dark" style="background:#FB411C"><div class="name">accent</div><div class="hex">#FB411C</div></div>
+    <div class="sw on-dark" style="background:#9E270F"><div class="name">accent-deep</div><div class="hex">#9E270F</div></div>
+    <div class="sw" style="background:#FAC900"><div class="name">accent-2 / warn</div><div class="hex">#FAC900</div></div>
+    <div class="sw on-dark" style="background:#0A0A0A"><div class="name">bg-dark</div><div class="hex">#0A0A0A</div></div>
+    <div class="sw" style="background:#F7F7F8"><div class="name">bg-light</div><div class="hex">#F7F7F8</div></div>
+  </div>
+  <div class="cap">Kit default skin — neutral, product-agnostic (one accent over a near-mono base)</div>
+</body></html>

@@ -1,0 +1,212 @@
+/* ============================================================================
+   FONT FACE DECLARATIONS
+   ----------------------------------------------------------------------------
+   Upload the matching .woff2 files to fonts/ to activate each family.
+   Until then the fallback system stack in the token renders — nothing breaks.
+   Download from Google Fonts:
+     Inter           → https://fonts.google.com/specimen/Inter
+     JetBrains Mono  → https://fonts.google.com/specimen/JetBrains+Mono
+     Manrope         → https://fonts.google.com/specimen/Manrope
+     Instrument Serif→ https://fonts.google.com/specimen/Instrument+Serif
+   ============================================================================ */
+@font-face {
+  font-family: 'Inter';
+  src: url('./fonts/Inter-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('./fonts/JetBrainsMono-Variable.woff2') format('woff2');
+  font-weight: 100 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope';
+  src: url('./fonts/Manrope-Variable.woff2') format('woff2');
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('./fonts/InstrumentSerif-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('./fonts/InstrumentSerif-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================================================
+   METICS MEDIA — COLORS & TYPE
+   ----------------------------------------------------------------------------
+   The base type + color foundations for the Metics Media motion-graphics
+   system. This file documents the system for design tooling. The RENDER path
+   (animation-kit/) keeps its tokens INLINE in each clip — see animation-kit/
+   tokens.css. This file mirrors those tokens and adds semantic type vars.
+
+   Three layers live here:
+     1. KIT DEFAULT TOKENS — the neutral, product-agnostic skin (from tokens.css)
+     2. HOUSE STYLES — the two reference moods: .style-light (warm) / .style-dark
+        (cinematic). Apply one of these classes to a root container.
+     3. SEMANTIC TYPE — h1/h2/label/number/mono roles built on the font tokens.
+
+   GOLDEN RULE: components never hardcode a hex. Everything is var(--name) so a
+   video can be re-skinned to the product under review by swapping ~4 values.
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   1. KIT DEFAULT TOKENS  (neutral skin — the starting point for any new video)
+   Mirrors animation-kit/tokens.css. Swap --accent / --bg-* / --font-* per video.
+   ---------------------------------------------------------------------------- */
+:root {
+  /* Color — one accent, a dark base, a light base */
+  --accent:        #FB411C;   /* signature color: highlights, key numbers, CTAs, arrows */
+  --accent-deep:   #9E270F;   /* darker accent for hovers / gradient ends */
+  --accent-2:      #FAC900;   /* optional second accent, used sparingly */
+  --bg-dark:       #0A0A0A;   /* SOLID dark background */
+  --bg-light:      #F7F7F8;   /* SOLID light background */
+  --text-on-dark:  #FFFFFF;
+  --text-on-light: #2A2A2A;
+  --muted:         #5A5C5F;   /* secondary text / captions */
+  --muted-on-dark: rgba(255,255,255,0.55);
+  --hairline:      #323334;   /* dividers on dark */
+  --warn:          #FAC900;
+
+  /* Chip surfaces (one uppercase word on a chip is the only allowed text block) */
+  --chip-bg:       rgba(255,255,255,0.08);
+  --chip-border:   rgba(255,255,255,0.14);
+
+  /* Type — Inter is the intentional default brand font. Load the matching
+     Google Fonts <link> in each clip head. */
+  --font-display:  'Inter', system-ui, sans-serif;   /* headings — heavy weight, tight tracking */
+  --font-body:     'Inter', system-ui, sans-serif;   /* body / labels */
+  --font-mono:     'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Shape */
+  --radius-pill: 9999px;   /* pill buttons / badges */
+  --radius-card: 28px;     /* cards / tiles */
+
+  /* Layout — 1920×1080 stage coordinates (scales to 4K) */
+  --safe: 96px;                  /* 5% inset — keep key content inside this */
+  --lower-third-bottom: 110px;   /* clears the YouTube caption strip + sits below the face */
+
+  /* Motion */
+  --ease-out:  cubic-bezier(.2,.7,.2,1); /* @kind spacing */
+  --ease-back: cubic-bezier(.34,1.56,.64,1); /* @kind spacing */
+  --stagger:   300ms; /* @kind spacing */
+}
+
+/* ----------------------------------------------------------------------------
+   2. HOUSE STYLES  — the two reference moods (treat as inspiration, not template)
+   Apply .style-light or .style-dark to a container to flip the whole mood.
+   ---------------------------------------------------------------------------- */
+
+/* LIGHT / WARM — cream paper, blue + warm-orange accents (origin: Hermes project).
+   Friendly, approachable videos. */
+.style-light {
+  --accent:        #4F7CF7;   /* blue */
+  --accent-deep:   #2F5BD6;
+  --accent-2:      #F2A65A;   /* warm orange */
+  --bg-dark:       #14161B;   /* dark surface used for lower-third bodies / cards */
+  --bg-light:      #F4F2EC;   /* cream paper full-frame surface */
+  --text-on-dark:  #FFFFFF;
+  --text-on-light: #14161B;
+  --muted-on-dark: rgba(255,255,255,0.52);
+  --font-display:  'Manrope', system-ui, sans-serif;
+  --font-mono:     'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* DARK / CINEMATIC — near-black blue atmosphere, soft glow (origin: $10k Website).
+   Moodier, tech-forward videos. Pairs with backlight + grid + vignette + grain. */
+.style-dark {
+  --accent:        #5B8CFF;   /* glow blue */
+  --accent-deep:   #3563DB;
+  --accent-2:      #9BD1FF;   /* pale cyan highlight */
+  --bg-dark:       #0A0C12;
+  --bg-light:      #F4F6FB;
+  --text-on-dark:  #EEF2FB;
+  --text-on-light: #10141C;
+  --muted-on-dark: rgba(238,242,251,0.60);
+  --chip-bg:       rgba(255,255,255,0.08);
+  --chip-border:   rgba(255,255,255,0.14);
+  --font-display:  'Instrument Serif', Georgia, serif;   /* the cinematic serif */
+  --font-body:     system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ----------------------------------------------------------------------------
+   3. SEMANTIC TYPE  — roles for graphics. Sizes are 1920×1080 stage px.
+   Numbers are the loudest element by design; English text is minimized.
+   ---------------------------------------------------------------------------- */
+
+/* The hero number — the single biggest thing on screen ($1,000,000 / 5% / 5). */
+.t-number {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 360px;
+  line-height: 0.86;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Big title / end-card headline */
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 132px;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+
+/* Lower-third title */
+.t-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* Section / item heading inside an explainer */
+.t-heading {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 44px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+/* The ONE uppercase word on a chip — the only sanctioned text block.
+   Mono + wide tracking so a localizer can swap language without re-rendering motion. */
+.t-label {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+}
+
+/* Tiny kicker above a title (chapter index, category) */
+.t-kicker {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--muted-on-dark);
+}
+
+/* Mono — URLs, the big slash-number on lower-thirds, code-ish detail */
+.t-mono {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}

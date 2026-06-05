@@ -1,0 +1,219 @@
+/* ============================================================================
+   MOTION OVERLAYS — STUDIO CHROME
+   The interactive showcase shell. NOT the render path. The real render-safe
+   clips live in ../../animation-kit + ../../examples (vanilla JS, t-driven).
+   Here we recreate the *look* + motion language with CSS for an editor to
+   browse and re-skin live.
+   ============================================================================ */
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:#0b0c0f;color:#e9ebef;
+  -webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;height:100vh;overflow:hidden;
+}
+
+/* ---- top bar ---- */
+.topbar{
+  display:flex;align-items:center;gap:18px;
+  padding:0 22px;height:62px;flex-shrink:0;
+  border-bottom:1px solid #1c1e24;background:#0e0f13;
+}
+.topbar .brand{display:flex;align-items:center;gap:12px}
+.topbar .brand img{height:22px}
+.topbar .tag{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:#6d7078;padding-left:14px;border-left:1px solid #26282f;
+}
+.topbar .spacer{flex:1}
+.topbar .replay{
+  display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+  background:#1a1c22;border:1px solid #2a2d35;color:#e9ebef;
+  font-weight:600;font-size:13px;padding:9px 16px;border-radius:9px;
+  transition:background .15s,transform .1s;
+}
+.topbar .replay:hover{background:#23262e}
+.topbar .replay:active{transform:scale(.97)}
+.topbar .replay svg{width:15px;height:15px}
+
+/* ---- main split ---- */
+.main{flex:1;display:flex;min-height:0}
+
+/* ---- stage column ---- */
+.stage-col{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  padding:30px;min-width:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 30%,#16181d,#0b0c0f 75%);
+}
+/* the 16:9 footage frame */
+.frame{
+  position:relative;width:100%;max-width:920px;aspect-ratio:16/9;
+  border-radius:14px;overflow:hidden;flex-shrink:0;
+  box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px #23252c;
+}
+/* placeholder "talking-head footage" backdrop (no fake person) */
+.footage{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 40% 70% at 50% 92%,rgba(120,150,200,.18),transparent 60%),
+    linear-gradient(180deg,#2b3340,#1a2029 55%,#10141a);
+}
+.footage .silhouette{
+  position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  width:36%;height:66%;border-radius:46% 46% 0 0;
+  background:linear-gradient(180deg,rgba(10,14,20,.0),rgba(8,11,16,.55));
+  backdrop-filter:blur(2px);
+}
+.footage .ftag{
+  position:absolute;top:14px;left:16px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:rgba(255,255,255,.32);
+  display:flex;align-items:center;gap:7px;
+}
+.footage .ftag .rec{width:7px;height:7px;border-radius:50%;background:#ff4747;box-shadow:0 0 8px #ff4747}
+/* solid-clip mode paints the whole frame, hiding footage */
+.frame[data-mode="solid"] .footage{opacity:0}
+
+/* the overlay layer sits on the 1920x1080 coordinate stage, scaled to frame */
+.overlay-stage{position:absolute;inset:0}
+
+/* badge showing alpha vs solid */
+.mode-badge{
+  position:absolute;top:14px;right:16px;z-index:50;
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;padding:5px 11px;border-radius:999px;
+  background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.16);color:#cfd3da;
+  backdrop-filter:blur(6px);
+}
+
+/* ---- controls column ---- */
+.controls{
+  width:330px;flex-shrink:0;overflow-y:auto;
+  border-left:1px solid #1c1e24;background:#0e0f13;
+  padding:22px;display:flex;flex-direction:column;gap:26px;
+}
+.csec .clabel{
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;color:#6d7078;margin-bottom:12px;
+}
+/* archetype rail */
+.rail{display:flex;flex-direction:column;gap:8px}
+.rail .item{
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  padding:11px 13px;border-radius:10px;border:1px solid #1f2128;
+  background:#131419;transition:border-color .15s,background .15s;
+}
+.rail .item:hover{background:#181a20}
+.rail .item.active{border-color:var(--ui-accent,#5B8CFF);background:#181b24}
+.rail .item .ico{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;
+  background:#1e2028;color:var(--ui-accent,#5B8CFF);flex-shrink:0}
+.rail .item .ico svg{width:18px;height:18px}
+.rail .item .meta{min-width:0}
+.rail .item .meta .nm{font-weight:600;font-size:13px;white-space:nowrap}
+.rail .item .meta .sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:#6d7078;margin-top:3px;letter-spacing:.06em;white-space:nowrap}
+
+/* segmented (house style) */
+.seg{display:flex;background:#131419;border:1px solid #1f2128;border-radius:10px;padding:4px;gap:4px}
+.seg button{
+  flex:1;cursor:pointer;border:0;background:transparent;color:#9aa0a8;
+  font-family:inherit;font-weight:600;font-size:13px;padding:9px 0;border-radius:7px;
+  transition:background .15s,color .15s;
+}
+.seg button.on{background:#23262f;color:#fff}
+
+/* skin/accent swatches */
+.skins{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.skin{
+  display:flex;align-items:center;gap:9px;cursor:pointer;
+  padding:9px 10px;border-radius:9px;border:1px solid #1f2128;background:#131419;
+  transition:border-color .15s;
+}
+.skin:hover{border-color:#3a3d46}
+.skin.on{border-color:#fff}
+.skin .dot{width:18px;height:18px;border-radius:6px;flex-shrink:0}
+.skin .nm{font-size:12px;font-weight:600}
+.skin .ft{font-family:'JetBrains Mono',monospace;font-size:9px;color:#6d7078}
+
+.hint{
+  font-size:12px;line-height:1.5;color:#8a8f98;
+  border-top:1px solid #1c1e24;padding-top:18px;
+}
+.hint b{color:#c4c8cf;font-weight:600}
+
+/* ============================================================================
+   OVERLAY ARCHETYPES — recreated look. Positioned on a 1920x1080 stage that is
+   scaled to the frame via a CSS variable --s set by JS.
+   ============================================================================ */
+.stage1080{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:top left}
+
+/* ---------- cta bar (ALPHA bottom overlay) ---------- */
+.o-ctabar{position:absolute;bottom:160px;left:50%;transform:translateX(-50%);display:flex;justify-content:center}
+.o-ctabar .bar{
+  background:#FFFFFF;color:#14161B;
+  font-family:var(--font-mono);font-weight:700;font-size:40px;
+  letter-spacing:0.01em;padding:26px 80px;border-radius:18px;
+  box-shadow:0 8px 48px rgba(0,0,0,.55);white-space:nowrap;
+}
+.frame[data-house="light"] .o-ctabar .bar{background:#14161B;color:#FFFFFF;box-shadow:0 8px 32px rgba(0,0,0,.22)}
+@keyframes riseIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.7)}70%{opacity:1;transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes growY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
+
+.playing .anim-rise{animation:riseIn .55s var(--ease,cubic-bezier(.2,.7,.2,1))}
+.playing .anim-slide{animation:slideIn .6s var(--ease,cubic-bezier(.2,.7,.2,1))}
+.playing .anim-pop{animation:popIn .6s var(--ease-back,cubic-bezier(.34,1.56,.64,1))}
+
+/* ---------- lower third ---------- */
+.o-lt{position:absolute;left:120px;bottom:130px;display:flex;align-items:stretch}
+.o-lt .br{width:13px;background:var(--accent);transform-origin:top center}
+.playing .o-lt .br{animation:growY .4s cubic-bezier(.2,.7,.2,1)}
+.o-lt .bd{background:var(--bg-dark);padding:24px 52px 24px 36px;display:flex;align-items:center;gap:32px}
+.o-lt .num{font-family:var(--font-mono);font-weight:800;font-size:72px;color:var(--accent);line-height:.9;letter-spacing:-0.04em;font-variant-numeric:tabular-nums}
+.o-lt .num .s{opacity:.5}
+.o-lt .tx{display:flex;flex-direction:column;gap:9px}
+.o-lt .k{font-family:var(--font-mono);font-weight:700;font-size:15px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted-on-dark)}
+.o-lt .t{font-family:var(--font-display);font-weight:800;font-size:56px;color:var(--text-on-dark);letter-spacing:-0.01em;line-height:1;white-space:nowrap}
+
+/* ---------- number pop ---------- */
+.o-np{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:22px}
+.o-np .ic{width:128px;height:128px;color:var(--accent-2);filter:drop-shadow(0 12px 40px var(--glow))}
+.o-np .ic svg{width:128px;height:128px}
+.o-np .num{font-family:var(--font-display);font-weight:800;font-size:330px;line-height:.86;color:var(--text-on-dark);letter-spacing:-0.02em;text-shadow:0 10px 60px rgba(0,0,0,.55);font-variant-numeric:tabular-nums;display:flex;align-items:baseline}
+.o-np .num .u{font-size:.42em;color:var(--accent-2);margin-left:8px}
+.o-np .chip{display:inline-flex;align-items:center;gap:13px;padding:13px 26px;border-radius:999px;background:var(--chip-bg);border:1px solid var(--chip-border);font-family:var(--font-body);font-weight:600;font-size:30px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-on-dark);backdrop-filter:blur(6px)}
+.o-np .chip .dot{width:11px;height:11px;border-radius:50%;background:var(--accent)}
+
+/* ---------- explainer (3 items) ---------- */
+.o-ex{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;gap:30px;width:1000px}
+.o-ex .item{display:flex;align-items:center;gap:34px}
+.o-ex .badge{width:104px;height:104px;border-radius:26px;flex-shrink:0;display:grid;place-items:center;background:var(--chip-bg);border:1px solid var(--chip-border);color:var(--accent-2)}
+.o-ex .badge svg{width:54px;height:54px}
+.o-ex .label{display:flex;flex-direction:column;gap:8px}
+.o-ex .label .n{font-family:var(--font-mono);font-weight:700;font-size:22px;letter-spacing:.2em;color:var(--accent)}
+.o-ex .label .h{font-family:var(--font-display);font-weight:800;font-size:54px;color:var(--text-on-dark);letter-spacing:-0.01em;line-height:1}
+
+/* ---------- cta end card ---------- */
+.o-cta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px}
+.o-cta .mark{width:150px;height:150px;border-radius:36px;display:grid;place-items:center;background:linear-gradient(160deg,var(--accent-2),var(--accent));box-shadow:0 26px 70px var(--glow),inset 0 2px 0 rgba(255,255,255,.4);color:#06101f}
+.o-cta .mark img{width:84px;height:84px;object-fit:contain}
+.o-cta .head{font-family:var(--font-display);font-weight:900;font-size:128px;letter-spacing:-0.02em;line-height:.9;color:var(--text)}
+.o-cta .btn{display:inline-flex;align-items:center;gap:18px;background:var(--accent);color:#fff;font-family:var(--font-display);font-weight:800;font-size:38px;letter-spacing:.14em;text-transform:uppercase;padding:24px 52px;border-radius:999px}
+.o-cta .btn .arr{width:15px;height:15px;border-radius:4px;background:#fff}
+
+/* cinematic solid-bg atmosphere (only in solid mode) */
+.atmos{position:absolute;inset:0;pointer-events:none}
+.atmos .bgfill{position:absolute;inset:0;background:radial-gradient(ellipse 75% 55% at 50% 54%,#11141c 0%,#07080d 46%,#020306 100%)}
+.atmos .backlight{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:1500px;height:900px;filter:blur(46px);background:radial-gradient(ellipse 55% 55% at 50% 50%,var(--glow) 0%,transparent 70%)}
+.atmos .grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.05) 1px,transparent 1.4px);background-size:60px 60px;mask-image:radial-gradient(ellipse 70% 60% at 50% 46%,#000 30%,transparent 80%)}
+.atmos .vig{position:absolute;inset:0;background:radial-gradient(ellipse 92% 78% at 50% 50%,transparent 55%,rgba(0,0,0,.7) 100%)}
+.frame[data-mode="alpha"] .atmos{display:none}
+/* light house solid fills flat paper */
+.frame[data-mode="solid"][data-house="light"] .atmos .bgfill{background:var(--bg-light)}
+.frame[data-mode="solid"][data-house="light"] .atmos .backlight,
+.frame[data-mode="solid"][data-house="light"] .atmos .grid,
+.frame[data-mode="solid"][data-house="light"] .atmos .vig{display:none}

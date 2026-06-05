@@ -1,0 +1,5 @@
+/* ============================================================================
+   METICS MEDIA — DESIGN SYSTEM ROOT STYLESHEET
+   Import this single file to get the full token + type system.
+   ============================================================================ */
+@import './colors_and_type.css';

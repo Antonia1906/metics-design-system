@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /* ============================================================================
    METICS ANIMATION KIT — PREFLIGHT VALIDATOR
    ----------------------------------------------------------------------------
@@ -11,7 +10,13 @@
      node validate.js *.html
 
    Exit code 0 = all passed, 1 = at least one FAIL. WARNs don't fail the run.
+
+   NOTE: this is a Node.js-only script. In browser contexts it exports nothing.
    ============================================================================ */
+
+/* guard: only run in Node.js — skip entirely when loaded as a browser module */
+if (typeof process !== 'undefined' && typeof require !== 'undefined' && process.argv) {
+
 const fs = require('fs');
 const path = require('path');
 
@@ -31,7 +36,7 @@ let hadFail = false;
 
 for (const file of files) {
   const src = fs.readFileSync(file, 'utf8');
-  // strip HTML comments so guidance text (e.g. "never use text/babel") isn't mistaken for real code
+  // strip HTML comments so guidance text isn't mistaken for real code
   const code = src.replace(/<!--[\s\S]*?-->/g, '');
   const base = path.basename(file);
   const fails = [];
@@ -62,24 +67,24 @@ for (const file of files) {
   if (stageBg) {
     const isTransparent = stageBg === 'transparent';
     if (fnAlpha && !isTransparent)
-      warns.push(`filename says ALPHA but STAGE_BG = "${stageBg}" (not transparent). Render --format prores4444-alpha expects a transparent stage.`);
+      warns.push(`filename says ALPHA but STAGE_BG = "${stageBg}" (not transparent).`);
     if (fnSolid && isTransparent)
-      warns.push('filename says SOLID but STAGE_BG = "transparent". A solid clip should paint the stage (solid-dark / solid-light).');
+      warns.push('filename says SOLID but STAGE_BG = "transparent". A solid clip should paint the stage.');
   } else {
     warns.push('could not find STAGE_BG = "..." — confirm alpha vs solid is set.');
   }
 
-  // duration present in window + sanity
+  // duration sanity
   const durMatch = code.match(/STORY_DURATION\s*=\s*([\d.]+)/);
   if (durMatch) {
     const d = parseFloat(durMatch[1]);
-    if (d > 90) warns.push(`STORY_DURATION = ${d}s is very long — confirm it matches the transcript span (and is built as a multi-beat scene).`);
+    if (d > 90) warns.push(`STORY_DURATION = ${d}s is very long — confirm it matches the transcript span.`);
     if (d <= 0) fails.push('STORY_DURATION must be > 0.');
   }
 
-  // determinism smell test: CSS keyframes used for content motion
+  // determinism smell test
   if (/@keyframes/.test(code) && /animation\s*:/.test(code))
-    warns.push('uses CSS @keyframes/animation — fine for decorative loops, but the FINAL look must be computed from t (setStoryTime must reproduce every frame).');
+    warns.push('uses CSS @keyframes/animation — fine for decorative loops, but FINAL look must be computed from t.');
 
   // report
   const status = fails.length ? 'FAIL' : (warns.length ? 'PASS (warnings)' : 'PASS');
@@ -91,3 +96,5 @@ for (const file of files) {
 
 console.log('');
 process.exit(hadFail ? 1 : 0);
+
+} /* end Node.js guard */

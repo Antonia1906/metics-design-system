@@ -1,0 +1,28 @@
+<!-- @dsCard group="Brand" -->
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'JetBrains Mono',monospace;display:grid;grid-template-columns:1fr 1fr;min-height:100%}
+  .panel{padding:26px;display:flex;flex-direction:column;justify-content:space-between;gap:18px}
+  .light{background:#F7F7F8}
+  .dark{background:#0A0A0A}
+  .marks{display:flex;align-items:center;gap:22px}
+  .marks img.word{height:34px}
+  .marks img.icon{height:48px}
+  .cap{font-size:10px;letter-spacing:.18em;text-transform:uppercase}
+  .light .cap{color:#9b9ea4}
+  .dark .cap{color:rgba(255,255,255,.45)}
+</style></head>
+<body>
+  <div class="panel light">
+    <div class="marks"><img class="word" src="../assets/Logos/MeticsMedia/mm_black.png" alt="Metics Media"></div>
+    <div class="marks"><img class="icon" src="../assets/Logos/MeticsMedia/icon_black.png" alt="icon"></div>
+    <div class="cap">on light → mm_black / icon_black</div>
+  </div>
+  <div class="panel dark">
+    <div class="marks"><img class="word" src="../assets/Logos/MeticsMedia/mm_white.png" alt="Metics Media"></div>
+    <div class="marks"><img class="icon" src="../assets/Logos/MeticsMedia/icon_white.png" alt="icon"></div>
+    <div class="cap">on dark → mm_white / icon_white</div>
+  </div>
+</body></html>

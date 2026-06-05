@@ -1,0 +1,56 @@
+<!-- @dsCard group="Components" -->
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;display:grid;grid-template-columns:1fr 1fr;gap:0;height:100%;min-height:200px}
+
+  /* mini frames */
+  .panel{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding-bottom:22px}
+  .panel.dark{background:radial-gradient(ellipse 80% 70% at 50% 35%,#1a1e2a,#0b0c10 75%)}
+  .panel.light{background:#F4F2EC}
+
+  /* star dots — dark panel only */
+  .stars{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(255,255,255,.6) 1px,transparent 1.2px),radial-gradient(circle,rgba(255,255,255,.35) 1px,transparent 1.2px);background-size:60px 60px,38px 38px;background-position:0 0,19px 19px;opacity:.5}
+
+  /* panel label */
+  .plabel{position:absolute;top:14px;left:14px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+  .dark .plabel{color:rgba(255,255,255,.4)}
+  .light .plabel{color:rgba(20,22,27,.4)}
+
+  /* the CTA bar */
+  .cta-bar{
+    position:relative;z-index:2;
+    display:flex;align-items:center;justify-content:center;
+    padding:14px 28px;border-radius:14px;
+    font-weight:600;font-size:15px;letter-spacing:.01em;
+    white-space:nowrap;
+    animation:ctaPop 5s cubic-bezier(.2,.7,.2,1) infinite;
+  }
+  .dark .cta-bar{background:#fff;color:#14161B;box-shadow:0 8px 32px rgba(0,0,0,.45)}
+  .light .cta-bar{background:#14161B;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+
+  @keyframes ctaPop{
+    0%    {transform:translateY(60px);opacity:0}
+    12%   {transform:translateY(0);opacity:1}
+    72%   {transform:translateY(0);opacity:1}
+    84%   {transform:translateY(60px);opacity:0}
+    100%  {transform:translateY(60px);opacity:0}
+  }
+  .light .cta-bar{animation-delay:-.4s}
+
+  /* divider */
+  .divider{position:absolute;top:0;bottom:0;left:0;width:1px;background:rgba(128,128,128,.2)}
+</style></head>
+<body>
+  <div class="panel dark">
+    <div class="stars"></div>
+    <div class="plabel">Dark mode</div>
+    <div class="cta-bar">meticsmedia.com/openclaw-YYK</div>
+  </div>
+  <div class="panel light">
+    <div class="divider"></div>
+    <div class="plabel">Light mode</div>
+    <div class="cta-bar">meticsmedia.com/openclaw-YYK</div>
+  </div>
+</body></html>

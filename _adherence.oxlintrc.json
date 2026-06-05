@@ -1,0 +1,112 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "animation-kit/**",
+              "ui_kits/motion-overlays/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Inter|JetBrains Mono|Manrope|Instrument Serif))/i]",
+        "message": "Font not provided by the design system. Available: Inter, JetBrains Mono, Manrope, Instrument Serif."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {},
+    "tokens": [
+      "--accent",
+      "--accent-2",
+      "--accent-deep",
+      "--bg-dark",
+      "--bg-light",
+      "--chip-bg",
+      "--chip-border",
+      "--ease-back",
+      "--ease-out",
+      "--font-body",
+      "--font-display",
+      "--font-mono",
+      "--hairline",
+      "--lower-third-bottom",
+      "--muted",
+      "--muted-on-dark",
+      "--radius-card",
+      "--radius-pill",
+      "--safe",
+      "--stagger",
+      "--text-on-dark",
+      "--text-on-light",
+      "--warn"
+    ],
+    "tokenKinds": {
+      "--accent": "color",
+      "--accent-deep": "color",
+      "--accent-2": "color",
+      "--bg-dark": "color",
+      "--bg-light": "color",
+      "--text-on-dark": "font",
+      "--text-on-light": "font",
+      "--muted": "color",
+      "--muted-on-dark": "color",
+      "--hairline": "color",
+      "--warn": "color",
+      "--chip-bg": "color",
+      "--chip-border": "color",
+      "--font-display": "font",
+      "--font-body": "font",
+      "--font-mono": "font",
+      "--radius-pill": "radius",
+      "--radius-card": "radius",
+      "--safe": "spacing",
+      "--lower-third-bottom": "spacing",
+      "--ease-out": "spacing",
+      "--ease-back": "spacing",
+      "--stagger": "spacing"
+    },
+    "fontFamilies": [
+      "Instrument Serif",
+      "Inter",
+      "JetBrains Mono",
+      "Manrope"
+    ]
+  }
+}
