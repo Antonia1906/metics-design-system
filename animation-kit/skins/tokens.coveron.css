@@ -1,0 +1,26 @@
+/* ============================================================================
+   BRAND TOKENS — COVERON  (first real skin; verified from coveron.com live CSS)
+   Paste this :root block into the BRAND TOKENS slot at the top of each clip.
+   ============================================================================ */
+:root{
+  --accent:        #FB411C;   /* Coveron orange-red */
+  --accent-deep:   #9E270F;
+  --bg-dark:       #0A0A0A;
+  --bg-light:      #F7F7F8;
+  --text-on-dark:  #FFFFFF;
+  --text-on-light: #2A2A2A;
+  --muted:         #5A5C5F;
+  --hairline:      #323334;
+  --warn:          #FAC900;
+
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  --radius-pill: 9999px;
+  --radius-card: 28px;
+
+  --safe: 96px;
+  --lower-third-bottom: 110px;
+
+  --ease-out: cubic-bezier(.2,.7,.2,1);
+}

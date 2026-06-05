@@ -1,0 +1,45 @@
+/* ============================================================================
+   METICS ANIMATION KIT — BRAND TOKENS
+   ----------------------------------------------------------------------------
+   One file per brand. To reskin a project, edit the values below and paste this
+   whole :root block into the "BRAND TOKENS" slot at the top of each clip's
+   <style> (the template keeps tokens inline so every file renders standalone).
+
+   Defaults below are NEUTRAL. Swap in the product's real palette + fonts.
+   Keep variable NAMES the same — components reference them by name.
+   ============================================================================ */
+:root{
+  /* ---- Color: one accent, a dark base, a light base ---- */
+  --accent:        #FB411C;   /* the brand's signature color — highlights, key numbers, CTAs, arrows */
+  --accent-deep:   #9E270F;   /* darker accent for hovers / gradient ends */
+  --bg-dark:       #0A0A0A;   /* SOLID dark background */
+  --bg-light:      #F7F7F8;   /* SOLID light background */
+  --text-on-dark:  #FFFFFF;
+  --text-on-light: #2A2A2A;
+  --muted:         #5A5C5F;   /* secondary text / captions */
+  --hairline:      #323334;   /* dividers on dark */
+  --warn:          #FAC900;   /* optional second accent, used sparingly */
+
+  /* ---- Type (load the matching Google Fonts <link> in the template head) ---- */
+  --font-display: 'Inter', system-ui, sans-serif;   /* headings — heavy weight, tight tracking */
+  --font-body:    'Inter', system-ui, sans-serif;   /* body / labels */
+
+  /* ---- Shape ---- */
+  --radius-pill: 9999px;   /* pill buttons / badges */
+  --radius-card: 28px;     /* cards / tiles */
+
+  /* ---- Layout (1920×1080 stage coordinates) ---- */
+  --safe: 96px;                  /* 5% inset — keep key content inside this */
+  --lower-third-bottom: 110px;   /* clears the YouTube caption strip + sits below the face */
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(.2,.7,.2,1);   /* settle, no overshoot */
+}
+
+/*
+  HOW TO RESKIN (per brand, ~2 min):
+   1. Replace the 4 colors that matter most: --accent, --bg-dark, --bg-light, --text-*.
+   2. Set --font-display / --font-body and update the Google Fonts <link> in the template.
+   3. Leave layout + motion tokens alone unless the look calls for it.
+  Brands are defined ONLY here. Components never hardcode a hex — they use var(--name).
+*/

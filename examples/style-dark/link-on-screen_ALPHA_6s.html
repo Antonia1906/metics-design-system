@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!--
+  ARCHETYPE : link-on-screen (clean URL banner)
+  OUTPUT    : ALPHA overlay  (STAGE_BG = 'transparent')
+  DURATION  : 6s @ 30fps
+  Suggested filename: link-on-screen_ALPHA_6s.html
+  Deterministic: every property is a pure function of playhead t (seconds).
+-->
+<title>link-on-screen — ALPHA — 6s</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent:        #5b8cff;
+    --accent-2:      #9bd1ff;
+    --bg-dark:       #0a0c12;
+    --bg-light:      #f4f6fb;
+    --text-on-dark:  #eef2fb;
+    --text-on-light: #10141c;
+    --muted-on-dark: rgba(238,242,251,0.60);
+    --font-display:  'Instrument Serif', Georgia, serif;
+    --font-body:     system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --chip-bg:       rgba(255,255,255,0.08);
+    --chip-border:   rgba(255,255,255,0.14);
+    --mono:          ui-monospace, 'SFMono-Regular', Menlo, 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; }
+
+  #viewport { position: fixed; inset: 0; overflow: hidden; }
+  #stage { position: absolute; top: 50%; left: 50%; width: 1920px; height: 1080px; transform-origin: center; transform: translate(-50%, -50%) scale(1); background: transparent; }
+
+  /* banner anchored toward lower third, centered horizontally */
+  .lk { position: absolute; left: 50%; bottom: 180px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .bar {
+    display: flex; align-items: center; gap: 24px;
+    padding: 26px 44px; border-radius: 999px;
+    background: rgba(12,15,22,0.72); border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 30px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    overflow: hidden;
+  }
+  .lk-ic { width: 54px; height: 54px; flex: 0 0 auto; color: var(--accent-2); display: grid; place-items: center; }
+  .lk-ic svg { width: 54px; height: 54px; display: block; }
+  .lk-url {
+    font: 500 56px/1 var(--mono); letter-spacing: 0.01em; color: var(--text-on-dark);
+    white-space: nowrap; display: inline-flex; align-items: center;
+  }
+  .lk-url .scheme { color: var(--muted-on-dark); }
+  .caret { display: inline-block; width: 3px; height: 1.05em; margin-left: 8px; background: var(--accent); border-radius: 2px; }
+  .underline { width: 0; height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transform-origin: left center; }
+
+  #scrub {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 9999; display: none; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 999px;
+    background: rgba(12,14,20,0.82); border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px); font: 500 13px/1 var(--font-body); color: var(--text-on-dark);
+  }
+  body.preview #scrub { display: flex; }
+  #scrub input[type=range] { width: 46vw; max-width: 760px; accent-color: var(--accent); }
+  #scrub button { background: var(--accent); color: #06101f; border: 0; border-radius: 8px; padding: 7px 11px; font: 600 12px var(--font-body); cursor: pointer; }
+  #scrub .tl { font-variant-numeric: tabular-nums; min-width: 90px; text-align: right; color: var(--muted-on-dark); }
+
+  /* ===============  RENDER MODE OVERRIDES  ====================== */
+  html, body { background: transparent; }
+  #viewport { background: transparent; }
+  #viewport[data-bg="black"] { background: #000; }
+  #viewport[data-bg="alpha"] { background: transparent; }
+  #viewport[data-bg="wall"] {
+    background-color: #8a8f98;
+    background-image:
+      linear-gradient(45deg, #7c828c 25%, transparent 25%),
+      linear-gradient(-45deg, #7c828c 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #7c828c 75%),
+      linear-gradient(-45deg, transparent 75%, #7c828c 75%);
+    background-size: 64px 64px; background-position: 0 0, 0 32px, 32px -32px, -32px 0;
+  }
+  @media print { #scrub { display: none !important; } }
+</style>
+</head>
+<body>
+  <div id="viewport">
+    <div id="stage">
+      <div class="lk">
+        <div class="bar" id="bar">
+          <div class="lk-ic" id="ic">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="24" cy="24" r="19"/><path d="M5 24h38"/><path d="M24 5c6 5 6 33 0 38c-6-5-6-33 0-38z"/>
+            </svg>
+          </div>
+          <div class="lk-url" id="url"><span class="scheme">https://</span><span id="host">yourdomain.example</span><span class="caret" id="caret"></span></div>
+        </div>
+        <div class="underline" id="under"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="scrub">
+    <button id="pp" type="button">❚❚</button>
+    <input id="seek" type="range" min="0" max="6" step="0.0333" value="0" />
+    <span class="tl" id="tl">0.00 / 6.00s</span>
+  </div>
+
+  <script>
+  (function () {
+    "use strict";
+
+    /* ====== CONTRACT CONSTANTS ====== */
+    var STAGE_BG = 'transparent';
+    var STORY_FPS = 30;
+    var STORY_DURATION = 6.0;
+    var STORY_BEATS = [
+      { id: 'bar',   in: 0.20, out: 5.20 },
+      { id: 'ic',    in: 0.45, out: 5.20 },
+      { id: 'url',   in: 0.70, out: 5.25 },   // host types in across this beat
+      { id: 'under', in: 1.20, out: 5.15 }
+    ];
+    var HOST = 'yourdomain.example';   // neutral placeholder; reskin here
+    var TYPE_DUR = 1.10;               // seconds for the host to type in
+
+    /* ====== HELPERS (pure) ====== */
+    function clamp01(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
+    function lerp(a,b,u){ return a + (b-a)*u; }
+    var eOut   = function(u){ return 1 - Math.pow(1-u, 3); };
+    var eInOut = function(u){ return u < 0.5 ? 4*u*u*u : 1 - Math.pow(-2*u+2, 3)/2; };
+    function beat(id){ for (var i=0;i<STORY_BEATS.length;i++){ if (STORY_BEATS[i].id===id) return STORY_BEATS[i]; } return { in:0, out:null }; }
+
+    var el = {
+      bar:   document.getElementById('bar'),
+      ic:    document.getElementById('ic'),
+      url:   document.getElementById('url'),
+      host:  document.getElementById('host'),
+      caret: document.getElementById('caret'),
+      under: document.getElementById('under')
+    };
+
+    /* ====== RENDER (pure function of t) ====== */
+    function render(t){
+      // bar — scale/fade in
+      var bb = beat('bar');
+      var bl = clamp01((t - bb.in) / 0.5), be = eOut(bl);
+      var bo = eInOut(clamp01((t - bb.out) / 0.45));
+      el.bar.style.opacity = (bl * (1 - bo)).toFixed(3);
+      el.bar.style.transform = 'translateY(' + ((1-be)*20).toFixed(2) + 'px) scale(' + lerp(0.96,1,be).toFixed(4) + ')';
+
+      // icon — fade
+      var ib = beat('ic');
+      var il = clamp01((t - ib.in) / 0.45);
+      var io = eInOut(clamp01((t - ib.out) / 0.45));
+      el.ic.style.opacity = (il * (1 - io)).toFixed(3);
+
+      // url — deterministic "type-in" by slicing HOST to a character count derived from t
+      var ub = beat('url');
+      var ul = clamp01((t - ub.in) / 0.4);
+      var uo = eInOut(clamp01((t - ub.out) / 0.45));
+      el.url.style.opacity = (ul * (1 - uo)).toFixed(3);
+      var typed = clamp01((t - ub.in) / TYPE_DUR);
+      var n = Math.round(typed * HOST.length);
+      el.host.textContent = HOST.slice(0, n);
+      // caret blinks while typing, hides once complete (blink is a pure fn of t)
+      var blinkOn = (Math.floor(t * 2) % 2 === 0);
+      el.caret.style.opacity = (typed < 1 ? 1 : (blinkOn ? 1 : 0)) * (ul * (1 - uo));
+
+      // underline — wipe in left→right
+      var nb = beat('under');
+      var nl = clamp01((t - nb.in) / 0.6), ne = eOut(nl);
+      var no = eInOut(clamp01((t - nb.out) / 0.45));
+      el.under.style.opacity = (1 - no).toFixed(3);
+      el.under.style.width = (320 * ne).toFixed(1) + 'px';
+    }
+
+    /* ====== ENGINE / PLAYBACK ====== */
+    var stage = document.getElementById('stage');
+    var viewport = document.getElementById('viewport');
+    var seek = document.getElementById('seek'), tl = document.getElementById('tl'), pp = document.getElementById('pp');
+
+    function fit(){ var s = Math.min(viewport.clientWidth/1920, viewport.clientHeight/1080); stage.style.transform = 'translate(-50%, -50%) scale(' + s + ')'; }
+    if (window.ResizeObserver) new ResizeObserver(fit).observe(viewport);
+    window.addEventListener('resize', fit); fit();
+
+    var t = 0, playing = false, last = 0, raf = 0;
+    function paintChrome(){
+      if (seek) seek.value = t.toFixed(4);
+      if (tl) tl.textContent = t.toFixed(2) + ' / ' + STORY_DURATION.toFixed(2) + 's';
+      if (pp) pp.textContent = playing ? '❚❚' : '►';
+    }
+    function frame(now){
+      if (!playing) return;
+      var dt = (now - last) / 1000; last = now;
+      t += dt; if (t >= STORY_DURATION) t -= STORY_DURATION;
+      render(t); paintChrome(); raf = requestAnimationFrame(frame);
+    }
+    function setStoryTime(s){ playing = false; cancelAnimationFrame(raf); t = Math.max(0, Math.min(s, STORY_DURATION)); render(t); paintChrome(); }
+    function playStory(){ if (playing) return; playing = true; last = performance.now(); raf = requestAnimationFrame(frame); paintChrome(); }
+    function pauseStory(){ playing = false; cancelAnimationFrame(raf); paintChrome(); }
+
+    if (seek) seek.addEventListener('input', function(){ setStoryTime(parseFloat(seek.value)); });
+    if (pp) pp.addEventListener('click', function(){ playing ? pauseStory() : playStory(); });
+
+    /* ====== URL PARAMS ====== */
+    var P = new URLSearchParams(location.search);
+    var bg = P.get('bg'); if (bg) viewport.setAttribute('data-bg', bg);
+    if (P.get('preview') === '1') document.body.classList.add('preview');
+
+    /* ====== EXPOSE CONTRACT API ====== */
+    window.setStoryTime = setStoryTime;
+    window.playStory = playStory;
+    window.pauseStory = pauseStory;
+    window.STORY_DURATION = STORY_DURATION;
+    window.STORY_FPS = STORY_FPS;
+    window.STORY_BEATS = STORY_BEATS;
+    window.STAGE_BG = STAGE_BG;
+
+    /* ====== BOOT ====== */
+    function boot(){
+      el.host.textContent = '';
+      render(0);
+      var seekParam = P.get('t');
+      // Only honor ?t= when it is an actual number — guards against host/cache
+      // params that also use `t` (e.g. a hash) hijacking the seek.
+      if (seekParam != null && /^-?\d*\.?\d+$/.test(seekParam.trim())) setStoryTime(parseFloat(seekParam));
+      else if (P.get('autoplay') !== '0') playStory();
+      else { render(0); paintChrome(); }
+      window.__storyReady = true;
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot); else boot();
+  })();
+  </script>
+</body>
+</html>

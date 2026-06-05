@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!--
+  ARCHETYPE : lower-third (name / chapter card)
+  OUTPUT    : ALPHA overlay  (STAGE_BG = 'transparent')
+  DURATION  : 4s @ 30fps
+  Suggested filename: lower-third_ALPHA_4s.html
+  Deterministic: every property is a pure function of playhead t (seconds).
+-->
+<title>lower-third — ALPHA — 4s</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================= */
+  /* :root  BRAND TOKENS  — skin the whole file from here          */
+  /* ============================================================= */
+  :root {
+    --accent:        #5b8cff;
+    --accent-2:      #9bd1ff;
+    --bg-dark:       #0a0c12;
+    --bg-light:      #f4f6fb;
+    --text-on-dark:  #eef2fb;
+    --text-on-light: #10141c;
+    --muted-on-dark: rgba(238,242,251,0.60);
+    --font-display:  'Instrument Serif', Georgia, serif;
+    --font-body:     system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --chip-bg:       rgba(255,255,255,0.08);
+    --chip-border:   rgba(255,255,255,0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; }
+
+  #viewport { position: fixed; inset: 0; overflow: hidden; }
+  #stage {
+    position: absolute; top: 50%; left: 50%;
+    width: 1920px; height: 1080px;
+    transform-origin: center; transform: translate(-50%, -50%) scale(1);
+    background: transparent;            /* ALPHA */
+  }
+
+  /* ---- content ---- */
+  .lt { position: absolute; left: 150px; bottom: 168px; display: flex; gap: 28px; align-items: stretch; }
+  .lt-bar {
+    width: 7px; border-radius: 6px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    transform-origin: bottom center;
+    box-shadow: 0 0 30px rgba(91,140,255,0.5);
+  }
+  .lt-text { display: flex; flex-direction: column; gap: 16px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 11px; align-self: flex-start;
+    padding: 9px 17px; border-radius: 999px;
+    background: var(--chip-bg); border: 1px solid var(--chip-border);
+    font: 600 22px/1 var(--font-body); letter-spacing: 0.20em;
+    color: var(--text-on-dark); text-transform: uppercase;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .chip .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+  .title {
+    font: 400 98px/0.98 var(--font-display);
+    color: var(--text-on-dark); letter-spacing: -0.01em;
+    text-shadow: 0 6px 44px rgba(0,0,0,0.5); white-space: nowrap;
+  }
+  .sub { font: 500 30px/1 var(--font-body); color: var(--muted-on-dark); letter-spacing: 0.01em; }
+
+  /* ---- preview chrome (only when ?preview=1) ---- */
+  #scrub {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 9999; display: none; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 999px;
+    background: rgba(12,14,20,0.82); border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px); font: 500 13px/1 var(--font-body); color: var(--text-on-dark);
+  }
+  body.preview #scrub { display: flex; }
+  #scrub input[type=range] { width: 46vw; max-width: 760px; accent-color: var(--accent); }
+  #scrub button { background: var(--accent); color: #06101f; border: 0; border-radius: 8px; padding: 7px 11px; font: 600 12px var(--font-body); cursor: pointer; }
+  #scrub .tl { font-variant-numeric: tabular-nums; min-width: 86px; text-align: right; color: var(--muted-on-dark); }
+
+  /* ============================================================= */
+  /* ===============  RENDER MODE OVERRIDES  ====================== */
+  /* Transparent by default so the renderer captures clean alpha.   */
+  /* ?bg= swaps a REVIEW backdrop behind the stage only.            */
+  /* ============================================================= */
+  html, body { background: transparent; }
+  #viewport { background: transparent; }                 /* = alpha */
+  #viewport[data-bg="black"] { background: #000; }
+  #viewport[data-bg="alpha"] { background: transparent; }
+  #viewport[data-bg="wall"] {
+    background-color: #8a8f98;
+    background-image:
+      linear-gradient(45deg, #7c828c 25%, transparent 25%),
+      linear-gradient(-45deg, #7c828c 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #7c828c 75%),
+      linear-gradient(-45deg, transparent 75%, #7c828c 75%);
+    background-size: 64px 64px;
+    background-position: 0 0, 0 32px, 32px -32px, -32px 0;
+  }
+  @media print { #scrub { display: none !important; } }
+</style>
+</head>
+<body>
+  <div id="viewport">
+    <div id="stage">
+      <div class="lt">
+        <div class="lt-bar" id="bar"></div>
+        <div class="lt-text">
+          <div class="chip" id="chip"><span class="dot"></span>LABEL</div>
+          <div class="title" id="title">Primary Title</div>
+          <div class="sub" id="sub">Secondary line placeholder</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="scrub">
+    <button id="pp" type="button">❚❚</button>
+    <input id="seek" type="range" min="0" max="4" step="0.0333" value="0" />
+    <span class="tl" id="tl">0.00 / 4.00s</span>
+  </div>
+
+  <script>
+  (function () {
+    "use strict";
+
+    /* ====== CONTRACT CONSTANTS ====== */
+    var STAGE_BG = 'transparent';                 // ALPHA overlay
+    var STORY_FPS = 30;
+    var STORY_DURATION = 4.0;                      // seconds
+    var STORY_BEATS = [
+      { id: 'bar',   in: 0.20, out: 3.40 },
+      { id: 'chip',  in: 0.45, out: 3.40 },
+      { id: 'title', in: 0.60, out: 3.45 },
+      { id: 'sub',   in: 0.90, out: 3.50 }
+    ];
+
+    /* ====== HELPERS (pure) ====== */
+    function clamp01(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
+    function lerp(a,b,u){ return a + (b-a)*u; }
+    var eOut   = function(u){ return 1 - Math.pow(1-u, 3); };
+    var eInOut = function(u){ return u < 0.5 ? 4*u*u*u : 1 - Math.pow(-2*u+2, 3)/2; };
+    function beat(id){ for (var i=0;i<STORY_BEATS.length;i++){ if (STORY_BEATS[i].id===id) return STORY_BEATS[i]; } return { in:0, out:null }; }
+    // Standard rise+fade entrance/exit applied to an element.
+    function play(el, t, o){
+      var inDur  = o.inDur  != null ? o.inDur  : 0.55;
+      var outDur = o.outDur != null ? o.outDur : 0.45;
+      var li = clamp01((t - o.inAt) / inDur);
+      var ei = (o.ease || eOut)(li);
+      var eo = (o.outAt == null) ? 0 : eInOut(clamp01((t - o.outAt) / outDur));
+      var dist = o.dist != null ? o.dist : 26;
+      var dx   = o.dx != null ? o.dx : 0;
+      var y = (1-ei)*dist + eo*(-dist*0.55);
+      var x = (1-ei)*dx;
+      el.style.opacity = (li * (1-eo)).toFixed(3);
+      el.style.transform = 'translate3d(' + x.toFixed(2) + 'px,' + y.toFixed(2) + 'px,0)';
+      return { li: li, ei: ei, eo: eo };
+    }
+
+    var el = {
+      bar:   document.getElementById('bar'),
+      chip:  document.getElementById('chip'),
+      title: document.getElementById('title'),
+      sub:   document.getElementById('sub')
+    };
+
+    /* ====== RENDER  (pure function of t) ====== */
+    function render(t){
+      // accent bar — grows from bottom
+      var b = beat('bar');
+      var bl = clamp01((t - b.in) / 0.50), be = eOut(bl);
+      var bo = (b.out == null) ? 0 : eInOut(clamp01((t - b.out) / 0.40));
+      el.bar.style.opacity = (bl * (1-bo)).toFixed(3);
+      el.bar.style.transform = 'scaleY(' + (be * (1 - bo*0.0)).toFixed(3) + ')';
+
+      play(el.chip, t, { inAt: beat('chip').in,  outAt: beat('chip').out,  dist: 16, dx: -22, inDur: 0.5 });
+
+      // title — rise + left-to-right clip wipe
+      var tb = beat('title');
+      var r = play(el.title, t, { inAt: tb.in, outAt: tb.out, dist: 30, inDur: 0.6 });
+      el.title.style.clipPath = 'inset(0 ' + ((1 - r.ei) * 100).toFixed(2) + '% 0 0)';
+
+      play(el.sub,  t, { inAt: beat('sub').in,   outAt: beat('sub').out,   dist: 22, inDur: 0.55 });
+    }
+
+    /* ====== ENGINE / PLAYBACK ====== */
+    var stage = document.getElementById('stage');
+    var viewport = document.getElementById('viewport');
+    var seek = document.getElementById('seek');
+    var tl = document.getElementById('tl');
+    var pp = document.getElementById('pp');
+
+    function fit(){
+      var s = Math.min(viewport.clientWidth / 1920, viewport.clientHeight / 1080);
+      stage.style.transform = 'translate(-50%, -50%) scale(' + s + ')';
+    }
+    if (window.ResizeObserver) new ResizeObserver(fit).observe(viewport);
+    window.addEventListener('resize', fit); fit();
+
+    var t = 0, playing = false, last = 0, raf = 0;
+    function paintChrome(){
+      if (seek) seek.value = t.toFixed(4);
+      if (tl) tl.textContent = t.toFixed(2) + ' / ' + STORY_DURATION.toFixed(2) + 's';
+      if (pp) pp.textContent = playing ? '❚❚' : '►';
+    }
+    function frame(now){
+      if (!playing) return;
+      var dt = (now - last) / 1000; last = now;
+      t += dt; if (t >= STORY_DURATION) t -= STORY_DURATION;   // loop for live preview only
+      render(t); paintChrome();
+      raf = requestAnimationFrame(frame);
+    }
+    function setStoryTime(s){
+      playing = false; cancelAnimationFrame(raf);
+      t = Math.max(0, Math.min(s, STORY_DURATION));
+      render(t); paintChrome();
+    }
+    function playStory(){ if (playing) return; playing = true; last = performance.now(); raf = requestAnimationFrame(frame); paintChrome(); }
+    function pauseStory(){ playing = false; cancelAnimationFrame(raf); paintChrome(); }
+
+    if (seek) seek.addEventListener('input', function(){ setStoryTime(parseFloat(seek.value)); });
+    if (pp) pp.addEventListener('click', function(){ playing ? pauseStory() : playStory(); });
+
+    /* ====== URL PARAMS ====== */
+    var P = new URLSearchParams(location.search);
+    var bg = P.get('bg');                         // black | wall | alpha
+    if (bg) viewport.setAttribute('data-bg', bg);
+    if (P.get('preview') === '1') document.body.classList.add('preview');
+
+    /* ====== EXPOSE CONTRACT API ====== */
+    window.setStoryTime  = setStoryTime;
+    window.playStory     = playStory;
+    window.pauseStory    = pauseStory;
+    window.STORY_DURATION = STORY_DURATION;
+    window.STORY_FPS      = STORY_FPS;
+    window.STORY_BEATS    = STORY_BEATS;
+    window.STAGE_BG       = STAGE_BG;
+
+    /* ====== BOOT ====== */
+    function boot(){
+      render(0);
+      var seekParam = P.get('t');
+      // Only honor ?t= when it is an actual number — guards against host/cache
+      // params that also use `t` (e.g. a hash) hijacking the seek.
+      if (seekParam != null && /^-?\d*\.?\d+$/.test(seekParam.trim())) setStoryTime(parseFloat(seekParam));
+      else if (P.get('autoplay') !== '0') playStory();
+      else { render(0); paintChrome(); }
+      window.__storyReady = true;
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot); else boot();
+  })();
+  </script>
+</body>
+</html>

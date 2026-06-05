@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 3000 3000">
+  <!-- Generator: Adobe Illustrator 30.3.0, SVG Export Plug-In . SVG Version: 2.1.3 Build 182)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #3a0a0d;
+      }
+
+      .st1 {
+        fill: #ff775f;
+      }
+
+      .st2 {
+        fill: #ff4f40;
+      }
+
+      .st3 {
+        fill: #081016;
+      }
+
+      .st4 {
+        fill: #f5fbff;
+      }
+    </style>
+  </defs>
+  <g>
+    <rect class="st0" x="351.73" y="927.87" width="164.04" height="492.11"/>
+    <rect class="st0" x="515.77" y="763.83" width="164.04" height="164.04"/>
+    <rect class="st0" x="515.77" y="1419.98" width="164.04" height="164.04"/>
+    <rect class="st0" x="679.81" y="599.79" width="164.04" height="164.04"/>
+    <rect class="st0" x="679.81" y="1584.02" width="164.04" height="164.04"/>
+    <rect class="st0" x="843.85" y="435.75" width="164.04" height="164.04"/>
+    <rect class="st0" x="843.85" y="1748.06" width="164.04" height="164.04"/>
+    <rect class="st0" x="1007.89" y="435.75" width="984.23" height="164.04"/>
+    <rect class="st0" x="1992.11" y="435.75" width="164.04" height="164.04"/>
+    <rect class="st0" x="2156.15" y="599.79" width="164.04" height="164.04"/>
+    <rect class="st0" x="2156.15" y="1584.02" width="164.04" height="164.04"/>
+    <rect class="st0" x="2320.19" y="763.83" width="164.04" height="164.04"/>
+    <rect class="st0" x="2320.19" y="1419.98" width="164.04" height="164.04"/>
+    <rect class="st0" x="2484.23" y="927.87" width="164.04" height="492.11"/>
+    <rect class="st0" x="1007.89" y="1912.1" width="984.23" height="164.04"/>
+    <rect class="st0" x="843.85" y="2076.13" width="164.04" height="164.04"/>
+    <rect class="st0" x="1992.11" y="2076.13" width="164.04" height="164.04"/>
+    <rect class="st0" x="679.81" y="2240.17" width="164.04" height="164.04"/>
+    <rect class="st0" x="2156.15" y="2240.17" width="164.04" height="164.04"/>
+    <rect class="st0" x="1007.89" y="2404.21" width="984.23" height="164.04"/>
+  </g>
+  <g>
+    <rect class="st2" x="1007.89" y="599.79" width="984.23" height="164.04"/>
+    <rect class="st2" x="843.85" y="763.83" width="1312.31" height="164.04"/>
+    <rect class="st2" x="679.81" y="927.87" width="1640.38" height="164.04"/>
+    <rect class="st2" x="679.81" y="1091.9" width="1640.38" height="164.04"/>
+    <rect class="st2" x="679.81" y="1255.94" width="1640.38" height="164.04"/>
+    <rect class="st2" x="843.85" y="1419.98" width="1312.31" height="164.04"/>
+    <rect class="st2" x="1007.89" y="1584.02" width="984.23" height="164.04"/>
+    <rect class="st2" x="1007.89" y="2076.13" width="984.23" height="164.04"/>
+    <rect class="st2" x="1171.92" y="2240.17" width="656.15" height="164.04"/>
+  </g>
+  <g>
+    <rect class="st1" x="351.73" y="1091.9" width="328.08" height="164.04"/>
+    <rect class="st1" x="515.77" y="927.87" width="164.04" height="164.04"/>
+    <rect class="st1" x="515.77" y="1255.94" width="164.04" height="164.04"/>
+    <rect class="st1" x="2320.19" y="1091.9" width="328.08" height="164.04"/>
+    <rect class="st1" x="2320.19" y="927.87" width="164.04" height="164.04"/>
+    <rect class="st1" x="2320.19" y="1255.94" width="164.04" height="164.04"/>
+  </g>
+  <g>
+    <rect class="st3" x="1171.92" y="927.87" width="164.04" height="164.04"/>
+    <rect class="st3" x="1664.04" y="927.87" width="164.04" height="164.04"/>
+  </g>
+  <g>
+    <rect class="st4" x="1171.92" y="763.83" width="164.04" height="164.04"/>
+    <rect class="st4" x="1664.04" y="763.83" width="164.04" height="164.04"/>
+  </g>
+</svg>

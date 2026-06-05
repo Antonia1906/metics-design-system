@@ -1,0 +1,233 @@
+<!doctype html>
+<!-- ============================================================
+     ARCHETYPE : cta (end-card call to action)
+     OUTPUT    : SOLID full-frame clip  (STAGE_BG = 'solid-dark')
+     DURATION  : 8.0s  (3 beats; see STORY_BEATS)
+     Suggested filename: cta_SOLID_8s.html
+     Plain vanilla JS. Animation is a pure function of `t` (seconds).
+     NOTE: this is a SOLID clip — the stage paints its own background,
+           so it is a full-frame cut, not a transparent overlay.
+     ============================================================ -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CTA — SOLID — 8s</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ===================== BRAND TOKENS ====================== */
+    --accent:        #4F7CF7;
+    --accent-2:      #F2A65A;
+    --bg-dark:       #14161B;
+    --bg-light:      #F4F2EC;
+    --text-on-dark:  #FFFFFF;
+    --text-on-light: #14161B;
+    --muted-on-dark: rgba(255,255,255,0.52);
+    --font-display:  'Manrope', system-ui, sans-serif;
+    --font-mono:     'JetBrains Mono', ui-monospace, monospace;
+    /* ======================================================== */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: var(--font-display); }
+
+  #app { position: fixed; inset: 0; display: flex; flex-direction: column; }
+  .stage-host { flex: 1; position: relative; overflow: hidden;
+                display: flex; align-items: center; justify-content: center; }
+  .stage { position: relative; width: 1920px; height: 1080px;
+           transform-origin: center center; overflow: hidden; flex-shrink: 0; }
+
+  /* ---------- component: end card ---------- */
+  .cta { position: absolute; inset: 0; display: flex; flex-direction: column;
+         align-items: center; justify-content: center; gap: 40px; }
+  .cta-logo { width: 280px; height: 280px; border-radius: 32px;
+              background: repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 14px, rgba(255,255,255,.03) 14px 28px);
+              display: grid; place-items: center; color: var(--muted-on-dark);
+              font-family: var(--font-mono); font-size: 16px; letter-spacing: .34em;
+              will-change: transform, opacity; }
+  .cta-head { font-family: var(--font-display); font-weight: 900; font-size: 132px;
+              letter-spacing: -0.02em; line-height: .9; color: var(--text-on-dark);
+              will-change: transform, opacity; }
+  .cta-btn { display: inline-flex; align-items: center; gap: 18px;
+             background: var(--accent); color: #fff; font-family: var(--font-display);
+             font-weight: 800; font-size: 40px; letter-spacing: .14em; text-transform: uppercase;
+             padding: 26px 54px; border-radius: 999px; will-change: transform, opacity; }
+  .cta-btn .arr { width: 16px; height: 16px; border-radius: 4px; background: #fff; }
+  .cta-row { display: flex; gap: 26px; margin-top: 6px; }
+  .chip { width: 88px; height: 88px; border-radius: 50%;
+          background: rgba(255,255,255,.06); display: grid; place-items: center;
+          color: var(--muted-on-dark); will-change: transform, opacity; }
+  .chip svg { width: 40px; height: 40px; }
+
+  /* ---------- preview chrome ---------- */
+  .preview-bar { display: none; }
+  body.preview .preview-bar {
+    display: flex; align-items: center; gap: 14px; height: 56px; padding: 0 18px;
+    background: #0c0d11; border-top: 1px solid rgba(255,255,255,.08);
+    font-family: var(--font-mono); color: #cfd2d8; flex-shrink: 0; }
+  .pv-play { width: 34px; height: 34px; border-radius: 50%; border: none;
+             background: var(--accent); color: #fff; cursor: pointer; font-size: 12px; }
+  .pv-time, .pv-dur { font-size: 12px; min-width: 42px; }
+  .pv-dur { color: rgba(255,255,255,.45); }
+  .pv-track { flex: 1; height: 6px; background: rgba(255,255,255,.1); border-radius: 3px; position: relative; cursor: pointer; }
+  .pv-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--accent); border-radius: 3px; }
+  .pv-thumb { position: absolute; top: 50%; left: 0; width: 13px; height: 13px; border-radius: 50%; background: #fff; transform: translate(-50%,-50%); }
+  .pv-beat { position: absolute; top: -5px; bottom: -5px; width: 2px; background: rgba(255,255,255,.3); }
+
+  /* ============ RENDER MODE OVERRIDES ============ *
+   * SOLID clip: the stage paints --bg-dark itself (set in JS), so ?bg only
+   * affects the letterbox surround during review.                          */
+  html, body { background: transparent; }
+  .stage-host { background: transparent; }
+  body.preview .stage-host { background: #0a0b0e; }
+  html[data-bg="black"] .stage-host { background: #000; }
+  html[data-bg="wall"]  .stage-host { background: radial-gradient(ellipse 80% 60% at 50% 35%, #FBF8F1, #EDE7DC 60%, #DDD5C5); }
+  html[data-bg="alpha"] .stage-host { background: conic-gradient(#1a1a1a 0% 25%, #242427 25% 50%, #1a1a1a 50% 75%, #242427 75% 100%); background-size: 80px 80px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="stage-host">
+    <div class="stage" id="stage">
+      <div class="cta" id="cta">
+        <div class="cta-logo" id="ctaLogo">LOGO</div>
+        <div class="cta-head" id="ctaHead">SUBSCRIBE</div>
+        <div class="cta-btn" id="ctaBtn"><span>GO</span><span class="arr"></span></div>
+        <div class="cta-row" id="ctaRow">
+          <div class="chip" data-chip><svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="3.5"/></svg></div>
+          <div class="chip" data-chip><svg viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="7" stroke="currentColor" stroke-width="3.5"/></svg></div>
+          <div class="chip" data-chip><svg viewBox="0 0 40 40" fill="none"><path d="M8 14 L20 24 L32 14" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="preview-bar">
+    <button class="pv-play" id="pvPlay">&#9658;</button>
+    <div class="pv-time" id="pvTime">0:00</div>
+    <div class="pv-track" id="pvTrack"><div class="pv-fill" id="pvFill"></div><div class="pv-thumb" id="pvThumb"></div></div>
+    <div class="pv-dur" id="pvDur">0:00</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ===================== CONFIG ===================== */
+  const STAGE_BG = 'solid-dark';           // SOLID full-frame clip
+  const DURATION = 8.0;
+  const FPS = 30;
+  const BEATS = [
+    { id: 1, in: 0.3, out: 8.0, label: 'logo' },
+    { id: 2, in: 0.8, out: 8.0, label: 'headline' },
+    { id: 3, in: 1.3, out: 8.0, label: 'cta' },
+  ];
+
+  /* ===================== HELPERS (pure t-driven) ===================== */
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const clamp01 = v => clamp(v, 0, 1);
+  const easeOutCubic = u => 1 - Math.pow(1 - clamp01(u), 3);
+  const easeInCubic  = u => Math.pow(clamp01(u), 3);
+  const easeOutBack  = (u, s = 1.5) => { u = clamp01(u); return 1 + (s + 1) * Math.pow(u - 1, 3) + s * Math.pow(u - 1, 2); };
+  const lerp = (t, t0, t1, v0, v1, ease = easeOutCubic) => {
+    if (t <= t0) return v0; if (t >= t1) return v1;
+    return v0 + (v1 - v0) * ease((t - t0) / (t1 - t0));
+  };
+  const set = (el, o = {}) => {
+    el.style.opacity = (o.o == null ? 1 : o.o);
+    el.style.transform = `translate(${o.x || 0}px,${o.y || 0}px) scale(${o.s == null ? 1 : o.s})`;
+  };
+  const fmt = s => { s = Math.max(0, s); const m = Math.floor(s / 60), ss = Math.floor(s % 60); return m + ':' + String(ss).padStart(2, '0'); };
+
+  /* ===================== HARNESS ===================== */
+  const P = new URLSearchParams(location.search);
+  const host = document.querySelector('.stage-host');
+  const stage = document.getElementById('stage');
+  stage.style.background = STAGE_BG === 'solid-dark' ? 'var(--bg-dark)' : STAGE_BG === 'solid-light' ? 'var(--bg-light)' : 'transparent';
+  const bgParam = P.get('bg'); if (bgParam) document.documentElement.setAttribute('data-bg', bgParam);
+  const PREVIEW = P.get('preview') === '1'; if (PREVIEW) document.body.classList.add('preview');
+  const fit = () => { stage.style.transform = 'scale(' + Math.min(host.clientWidth / 1920, host.clientHeight / 1080) + ')'; };
+  new ResizeObserver(fit).observe(host); fit();
+
+  const ctaLogo = document.getElementById('ctaLogo'),
+        ctaHead = document.getElementById('ctaHead'),
+        ctaBtn = document.getElementById('ctaBtn'),
+        chips = [...document.querySelectorAll('[data-chip]')];
+
+  /* ===================== STATE ===================== */
+  const initialT = parseFloat(P.get('t'));
+  const hasT = isFinite(initialT);
+  let t = hasT ? clamp(initialT, 0, DURATION) : 0;
+  let playing = P.get('autoplay') !== '0' && !hasT;
+  let last = null;
+
+  /* ===================== RENDER — pure function of t ===================== */
+  function render(t) {
+    set(ctaLogo, { o: lerp(t, 0.3, 0.9, 0, 1), s: lerp(t, 0.3, 1.0, 0.6, 1, easeOutBack), y: lerp(t, 0.3, 0.9, 24, 0) });
+    set(ctaHead, { o: lerp(t, 0.8, 1.4, 0, 1), y: lerp(t, 0.8, 1.4, 36, 0, easeOutCubic) });
+
+    // CTA button pops, then gently pulses on hold (deterministic in t)
+    const btnIn = lerp(t, 1.3, 1.9, 0, 1);
+    const pulse = t > 1.9 ? 1 + 0.03 * Math.sin((t - 1.9) * 3.4) : 1;
+    set(ctaBtn, { o: btnIn, s: lerp(t, 1.3, 2.0, 0.7, 1, easeOutBack) * pulse });
+
+    // social chips stagger in ~300ms apart
+    chips.forEach((c, i) => {
+      const inT = 1.7 + i * 0.3;
+      set(c, { o: lerp(t, inT, inT + 0.5, 0, 1), s: lerp(t, inT, inT + 0.55, 0.5, 1, easeOutBack), y: lerp(t, inT, inT + 0.5, 18, 0) });
+    });
+    updatePreview(t);
+  }
+
+  /* ===================== PREVIEW BAR ===================== */
+  let pvPlay, pvFill, pvThumb, pvTime;
+  if (PREVIEW) {
+    pvPlay = document.getElementById('pvPlay'); pvFill = document.getElementById('pvFill');
+    pvThumb = document.getElementById('pvThumb'); pvTime = document.getElementById('pvTime');
+    document.getElementById('pvDur').textContent = fmt(DURATION);
+    pvPlay.onclick = () => { playing = !playing; };
+    const track = document.getElementById('pvTrack'); let drag = false;
+    BEATS.forEach(b => { const m = document.createElement('div'); m.className = 'pv-beat'; m.style.left = (b.in / DURATION * 100) + '%'; track.appendChild(m); });
+    const seek = e => { const r = track.getBoundingClientRect(); window.setStoryTime(clamp01((e.clientX - r.left) / r.width) * DURATION); };
+    track.addEventListener('mousedown', e => { drag = true; seek(e); });
+    window.addEventListener('mousemove', e => { if (drag) seek(e); });
+    window.addEventListener('mouseup', () => drag = false);
+    window.addEventListener('keydown', e => {
+      if (e.code === 'Space') { e.preventDefault(); playing = !playing; }
+      else if (e.code === 'ArrowLeft')  window.setStoryTime(t - (e.shiftKey ? 1 : 1 / FPS));
+      else if (e.code === 'ArrowRight') window.setStoryTime(t + (e.shiftKey ? 1 : 1 / FPS));
+    });
+  }
+  function updatePreview(tt) {
+    if (!PREVIEW) return;
+    const u = DURATION ? tt / DURATION : 0;
+    pvFill.style.width = (u * 100) + '%';
+    pvThumb.style.left = (u * 100) + '%';
+    pvTime.textContent = fmt(tt);
+    pvPlay.innerHTML = playing ? '&#10074;&#10074;' : '&#9658;';
+  }
+
+  /* ===================== LOOP ===================== */
+  function frame(now) {
+    if (playing) { if (last == null) last = now; const dt = (now - last) / 1000; last = now; t += dt; if (t >= DURATION) t = t % DURATION; }
+    else last = null;
+    render(t);
+    requestAnimationFrame(frame);
+  }
+  render(t);
+  requestAnimationFrame(frame);
+
+  /* ===================== WINDOW API ===================== */
+  window.setStoryTime = s => { playing = false; last = null; t = clamp(s, 0, DURATION); render(t); };
+  window.playStory  = () => { playing = true; };
+  window.pauseStory = () => { playing = false; };
+  window.STORY_DURATION = DURATION;
+  window.STORY_FPS = FPS;
+  window.STORY_BEATS = BEATS;
+  window.__storyReady = true;
+})();
+</script>
+</body>
+</html>

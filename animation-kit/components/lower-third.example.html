@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Lower Third — Example</title>
+<!-- ARCHETYPE: lower-third / chapter card. ALPHA. ~4s. Sits lower-left over footage.
+     Demonstrates: bracket wipe + slide-in + number/title, fade in/out envelope. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#FB411C; --bg-dark:#0A0A0A; --text-on-dark:#FFFFFF; --muted:#5A5C5F;
+  --font-display:'Inter',system-ui,sans-serif; --font-body:'Inter',system-ui,sans-serif;
+  --safe:96px; --lower-third-bottom:110px; --radius-card:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:transparent;font-family:var(--font-body);color:var(--text-on-dark);-webkit-font-smoothing:antialiased}
+#host{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;width:1920px;height:1080px;transform-origin:center center;overflow:hidden}
+html[data-review="black"] body{background:#000}
+html[data-review="alpha"] body{background:conic-gradient(#1a1a1a 0% 25%,#242427 25% 50%,#1a1a1a 50% 75%,#242427 75% 100%);background-size:80px 80px}
+.transport{position:fixed;left:0;right:0;bottom:0;height:42px;display:none;align-items:center;gap:14px;padding:0 16px;z-index:9999;background:rgba(10,10,12,.82);color:#cfd2d6;font:600 13px/1 var(--font-body);backdrop-filter:blur(8px)}
+html[data-preview="1"] .transport{display:flex}
+.transport button{all:unset;cursor:pointer;padding:4px 10px;border-radius:6px;background:#26272b}.transport input{flex:1}
+
+/* --- lower third --- */
+.lt{position:absolute;left:var(--safe);bottom:var(--lower-third-bottom);display:flex;align-items:stretch;gap:22px}
+.lt .bracket{width:9px;background:var(--accent);border-radius:5px;transform-origin:top center}
+.lt .body{display:flex;flex-direction:column;justify-content:center;gap:6px;padding:14px 30px 14px 6px;background:rgba(10,10,12,.86);border-radius:var(--radius-card);backdrop-filter:blur(6px)}
+.lt .num{font:800 30px/1 var(--font-display);color:var(--accent);letter-spacing:.02em}
+.lt .title{font:800 60px/0.98 var(--font-display);letter-spacing:-0.02em}
+</style>
+</head>
+<body>
+  <div id="host"><div class="stage" id="stage">
+    <div class="lt" id="lt">
+      <div class="bracket" id="bracket"></div>
+      <div class="body">
+        <div class="num" id="num">01</div>
+        <div class="title" id="title">SECTION TITLE</div>
+      </div>
+    </div>
+  </div></div>
+  <div class="transport">
+    <button onclick="playStory()">▶</button><button onclick="pauseStory()">❚❚</button>
+    <input type="range" min="0" max="1000" value="0" oninput="setStoryTime(this.value/1000*STORY_DURATION)">
+    <span id="tc">0.00</span>
+  </div>
+<script>
+const clamp01=u=>Math.max(0,Math.min(1,u));
+const easeOutCubic=u=>1-Math.pow(1-clamp01(u),3);
+const easeInCubic=u=>Math.pow(clamp01(u),3);
+const easeOutBack=(u,s=1.5)=>{u=clamp01(u);return 1+(s+1)*Math.pow(u-1,3)+s*Math.pow(u-1,2)};
+const lerp=(t,a,b,v0,v1,e=easeOutCubic)=>{if(t<=a)return v0;if(t>=b)return v1;return v0+(v1-v0)*e((t-a)/(b-a))};
+const visible=(t,tin,tout,fi=0.4,fo=0.4)=>{if(t<tin||t>tout)return 0;if(t<tin+fi)return easeOutCubic((t-tin)/fi);if(t>tout-fo)return 1-easeInCubic((t-(tout-fo))/fo);return 1};
+
+/* CONFIG */
+const STORY_DURATION=4.0, STORY_FPS=30, STAGE_BG='transparent';
+const STORY_BEATS=[{id:'lt',in:0,out:4.0}];
+
+/* RENDER from t */
+const lt=document.getElementById('lt'), bracket=document.getElementById('bracket'),
+      num=document.getElementById('num'), title=document.getElementById('title');
+function render(t){
+  lt.style.opacity = visible(t,0,STORY_DURATION,0.35,0.45);
+  lt.style.transform = `translateX(${lerp(t,0,0.5,-30,0,easeOutBack)}px)`;
+  bracket.style.height = lerp(t,0.05,0.5,0,92,easeOutCubic)+'px';
+  num.style.opacity   = lerp(t,0.25,0.6,0,1);
+  title.style.opacity = lerp(t,0.32,0.7,0,1);
+  title.style.transform = `translateY(${lerp(t,0.32,0.7,8,0)}px)`;
+}
+
+/* HARNESS — do not edit */
+let _t=0,_p=false,_r=null,_l=0;
+function setStoryTime(s){_p=false;cancelAnimationFrame(_r);_t=Math.max(0,Math.min(STORY_DURATION,s));render(_t);_tc()}
+function playStory(){if(_p)return;_p=true;_l=performance.now();_lp()}
+function pauseStory(){_p=false;cancelAnimationFrame(_r)}
+function _lp(){const n=performance.now();_t+=(n-_l)/1000;_l=n;if(_t>=STORY_DURATION){_t=STORY_DURATION;render(_t);_p=false;_tc();return}render(_t);_tc();_r=requestAnimationFrame(_lp)}
+function _tc(){const e=document.getElementById('tc');if(e)e.textContent=_t.toFixed(2)}
+window.setStoryTime=setStoryTime;window.playStory=playStory;window.pauseStory=pauseStory;
+window.STORY_DURATION=STORY_DURATION;window.STORY_FPS=STORY_FPS;window.STORY_BEATS=STORY_BEATS;
+const stage=document.getElementById('stage');
+function _fit(){stage.style.transform=`scale(${Math.min(innerWidth/1920,innerHeight/1080)})`}addEventListener('resize',_fit);_fit();
+const P=new URLSearchParams(location.search);
+if(P.get('preview')==='1')document.documentElement.setAttribute('data-preview','1');
+if(P.get('bg'))document.documentElement.setAttribute('data-review',P.get('bg'));
+const T0=parseFloat(P.get('t'));
+render(0); if(isFinite(T0))setStoryTime(T0); else if(P.get('autoplay')!=='0')playStory();
+window.__storyReady=true;
+</script>
+</body>
+</html>

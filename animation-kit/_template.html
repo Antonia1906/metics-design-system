@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Animation Template</title>
+<!--
+  ============================================================================
+  METICS ANIMATION KIT — GOLDEN TEMPLATE
+  ----------------------------------------------------------------------------
+  Copy this file per clip. You ONLY edit the two marked sections:
+     (1) "CONFIG"      — duration, background mode, beats
+     (2) "BUILD + RENDER" — the DOM and how each property is computed from t
+  Do NOT touch the "HARNESS" section — it's what makes the file render to video.
+
+  Hard rules (the renderer depends on these):
+   - Plain vanilla JS only. NEVER use <script type="text/babel"> — it crashes
+     the 4K renderer. No JSX, no in-browser compile.
+   - Animation is a pure function of t (seconds). Compute every property from t
+     with lerp()/visible()/easings. No CSS @keyframes / animation-delay for the
+     final look, no "time since mount."
+   - Keep everything in this one file, one <script> tag.
+
+  Review in a browser:  open with ?preview=1  (shows scrub bar)
+                         add &bg=black|wall|alpha to preview a backdrop
+  Render to video (Claude Code):
+     node ~/.claude/skills/animations-to-video/scripts/render.js \
+       --input "FILE.html" --out "FILE.mov" --res 2160 --fps 30 \
+       --format prores4444-alpha     # ALPHA clips (transparent)
+       --format prores4444-opaque    # SOLID clips (painted background)
+  ============================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   BRAND TOKENS  — paste the contents of tokens.css here (kept inline so each
+   output file is self-contained and renders standalone). Neutral defaults below.
+   ============================================================================ */
+:root{
+  --accent:        #FB411C;
+  --accent-deep:   #9E270F;
+  --bg-dark:       #0A0A0A;
+  --bg-light:      #F7F7F8;
+  --text-on-dark:  #FFFFFF;
+  --text-on-light: #2A2A2A;
+  --muted:         #5A5C5F;
+  --hairline:      #323334;
+
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  --radius-pill: 9999px;
+  --radius-card: 28px;
+
+  --safe: 96px;            /* 5% of 1920 — keep key content inside this inset */
+  --lower-third-bottom: 110px;
+
+  --ease-out: cubic-bezier(.2,.7,.2,1);
+}
+
+/* ============================================================================
+   STAGE + CHROME  (do not edit)
+   ============================================================================ */
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{
+  width:100%; height:100%; overflow:hidden;
+  background:transparent;                 /* transparent by default → alpha capture */
+  font-family:var(--font-body); color:var(--text-on-dark);
+  -webkit-font-smoothing:antialiased;
+}
+#host{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+.stage{
+  position:relative; width:1920px; height:1080px;
+  transform-origin:center center; overflow:hidden;
+}
+/* SOLID clips paint the stage; set via STAGE_BG in CONFIG */
+.stage[data-bg="solid-dark"]  { background:var(--bg-dark); }
+.stage[data-bg="solid-light"] { background:var(--bg-light); color:var(--text-on-light); }
+
+/* preview-only review backdrops (never affect render; toggled by ?bg=) */
+html[data-review="black"] body{ background:#000; }
+html[data-review="wall"]  body{ background:radial-gradient(ellipse 80% 60% at 50% 35%, #1c1c1c 0%, #0a0a0a 70%); }
+html[data-review="alpha"] body{ background:conic-gradient(#1a1a1a 0% 25%,#242427 25% 50%,#1a1a1a 50% 75%,#242427 75% 100%); background-size:80px 80px; }
+
+/* preview transport — hidden by default (clean capture); shown with ?preview=1 */
+.transport{
+  position:fixed; left:0; right:0; bottom:0; height:42px; display:none;
+  align-items:center; gap:14px; padding:0 16px; z-index:9999;
+  background:rgba(10,10,12,.82); color:#cfd2d6; font:600 13px/1 var(--font-body);
+  backdrop-filter:blur(8px);
+}
+html[data-preview="1"] .transport{ display:flex; }
+.transport button{ all:unset; cursor:pointer; padding:4px 10px; border-radius:6px; background:#26272b; }
+.transport input[type=range]{ flex:1; }
+
+/* ----------------------------------------------------------------------------
+   EXAMPLE BEAT STYLES — delete/replace per clip
+   ---------------------------------------------------------------------------- */
+.lt{ position:absolute; left:var(--safe); bottom:var(--lower-third-bottom); display:flex; align-items:center; gap:18px; }
+.lt .bar{ width:8px; height:64px; background:var(--accent); border-radius:4px; transform-origin:top center; }
+.lt .label{ font:800 52px/1 var(--font-display); letter-spacing:-0.02em; }
+</style>
+</head>
+<body>
+  <div id="host">
+    <div class="stage" id="stage"><!-- beats injected by BUILD below --></div>
+  </div>
+
+  <div class="transport">
+    <button onclick="window.playStory()">▶</button>
+    <button onclick="window.pauseStory()">❚❚</button>
+    <input id="scrub" type="range" min="0" max="1000" value="0"
+           oninput="window.setStoryTime(this.value/1000*window.STORY_DURATION)">
+    <span id="tc">0.00 / 0.00s</span>
+  </div>
+
+<script>
+/* ============================================================================
+   TIMING HELPERS  (do not edit) — the entire animation vocabulary
+   ============================================================================ */
+const clamp01    = u => Math.max(0, Math.min(1, u));
+const easeOutCubic = u => 1 - Math.pow(1 - clamp01(u), 3);
+const easeInCubic  = u => Math.pow(clamp01(u), 3);
+const easeOutBack  = (u, s=1.4) => { u = clamp01(u); return 1 + (s+1)*Math.pow(u-1,3) + s*Math.pow(u-1,2); };
+const easeInOut    = u => { u = clamp01(u); return u < 0.5 ? 4*u*u*u : 1 - Math.pow(-2*u+2,3)/2; };
+// value v0→v1 as t crosses [t0,t1], eased, clamped at both ends
+const lerp = (t, t0, t1, v0, v1, ease = easeOutCubic) => {
+  if (t <= t0) return v0; if (t >= t1) return v1;
+  return v0 + (v1 - v0) * ease((t - t0) / (t1 - t0));
+};
+// fade-in / hold / fade-out envelope for an element's visibility window
+const visible = (t, tIn, tOut, fadeIn = 0.4, fadeOut = 0.4) => {
+  if (t < tIn || t > tOut) return 0;
+  if (t < tIn + fadeIn)  return easeOutCubic((t - tIn) / fadeIn);
+  if (t > tOut - fadeOut) return 1 - easeInCubic((t - (tOut - fadeOut)) / fadeOut);
+  return 1;
+};
+
+/* ============================================================================
+   (1) CONFIG  — EDIT PER CLIP
+   ============================================================================ */
+const STORY_DURATION = 4.0;        // seconds. Lower-third/title card: ~4s.
+                                   // Every other clip: EXACTLY the transcript span it covers.
+const STORY_FPS = 30;
+const STAGE_BG = 'transparent';    // 'transparent' for ALPHA clips,
+                                   // or 'solid-dark' / 'solid-light' for SOLID clips.
+const STORY_BEATS = [              // one entry per beat; in/out in seconds
+  { id: 'example', in: 0.0, out: STORY_DURATION }
+];
+
+/* ============================================================================
+   (2) BUILD + RENDER  — EDIT PER CLIP
+   Build the DOM once, then compute its look from t in render(t).
+   ============================================================================ */
+const stage = document.getElementById('stage');
+if (STAGE_BG !== 'transparent') stage.setAttribute('data-bg', STAGE_BG);
+
+// --- build DOM once ---
+stage.innerHTML = `
+  <div class="lt" id="ex">
+    <div class="bar" id="ex-bar"></div>
+    <div class="label" id="ex-label">EXAMPLE</div>
+  </div>
+`;
+const exBar   = document.getElementById('ex-bar');
+const exLabel = document.getElementById('ex-label');
+
+// --- compute look from t (this is the only timing source of truth) ---
+function render(t){
+  const op  = visible(t, 0.0, STORY_DURATION, 0.4, 0.4);   // fade in/out envelope
+  const barH = lerp(t, 0.0, 0.45, 0, 64, easeOutCubic);    // bracket wipes down
+  const x    = lerp(t, 0.0, 0.5, -24, 0, easeOutBack);     // slide in from left
+  document.getElementById('ex').style.opacity = op;
+  document.getElementById('ex').style.transform = `translateX(${x}px)`;
+  exBar.style.height = barH + 'px';
+  exLabel.style.opacity = lerp(t, 0.15, 0.55, 0, 1);
+}
+
+/* ============================================================================
+   HARNESS  — DO NOT EDIT BELOW THIS LINE
+   ============================================================================ */
+let _t = 0, _playing = false, _raf = null, _last = 0;
+function setStoryTime(s){ _playing = false; cancelAnimationFrame(_raf); _t = Math.max(0, Math.min(STORY_DURATION, s)); render(_t); updateTransport(); }
+function playStory(){ if (_playing) return; _playing = true; _last = performance.now(); _loop(); }
+function pauseStory(){ _playing = false; cancelAnimationFrame(_raf); }
+function _loop(){
+  const now = performance.now(); _t += (now - _last) / 1000; _last = now;
+  if (_t >= STORY_DURATION){ _t = STORY_DURATION; render(_t); _playing = false; updateTransport(); return; }
+  render(_t); updateTransport(); _raf = requestAnimationFrame(_loop);
+}
+function updateTransport(){
+  const tc = document.getElementById('tc'); const sc = document.getElementById('scrub');
+  if (tc) tc.textContent = _t.toFixed(2) + ' / ' + STORY_DURATION.toFixed(2) + 's';
+  if (sc && document.activeElement !== sc) sc.value = (_t / STORY_DURATION) * 1000;
+}
+window.setStoryTime = setStoryTime;
+window.playStory = playStory;
+window.pauseStory = pauseStory;
+window.STORY_DURATION = STORY_DURATION;
+window.STORY_FPS = STORY_FPS;
+window.STORY_BEATS = STORY_BEATS;
+
+// scale the 1920×1080 stage to fit the viewport
+function _fit(){ const s = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `scale(${s})`; }
+addEventListener('resize', _fit); _fit();
+
+// URL params: ?t= , ?autoplay=0 , ?preview=1 , ?bg=black|wall|alpha
+const _p = new URLSearchParams(location.search);
+if (_p.get('preview') === '1') document.documentElement.setAttribute('data-preview', '1');
+if (_p.get('bg')) document.documentElement.setAttribute('data-review', _p.get('bg'));
+const _t0 = parseFloat(_p.get('t'));
+const _autoplay = _p.get('autoplay') !== '0' && !isFinite(_t0);
+
+render(0);
+if (isFinite(_t0)) setStoryTime(_t0);
+else if (_autoplay) playStory();
+
+window.__storyReady = true;   // renderer waits on this
+</script>
+</body>
+</html>

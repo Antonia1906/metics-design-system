@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Explainer (multi-beat) — Example</title>
+<!-- ARCHETYPE: full-frame explainer / number stack. SOLID dark. ~12s, MULTI-BEAT.
+     Demonstrates: a BEATS array where each beat fades in/out on its own window,
+     so something is always developing across the whole span (matches a transcript
+     moment). Three stats count up and stack. Number-led, visual-first. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#FB411C; --bg-dark:#0A0A0A; --text-on-dark:#FFFFFF; --muted:#8A8C90;
+  --font-display:'Inter',system-ui,sans-serif; --font-body:'Inter',system-ui,sans-serif;
+  --radius-card:24px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:transparent;font-family:var(--font-body);color:var(--text-on-dark);-webkit-font-smoothing:antialiased}
+#host{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;width:1920px;height:1080px;transform-origin:center center;overflow:hidden}
+.stage[data-bg="solid-dark"]{background:var(--bg-dark)}
+.transport{position:fixed;left:0;right:0;bottom:0;height:42px;display:none;align-items:center;gap:14px;padding:0 16px;z-index:9999;background:rgba(10,10,12,.82);color:#cfd2d6;font:600 13px/1 var(--font-body)}
+html[data-preview="1"] .transport{display:flex}
+.transport button{all:unset;cursor:pointer;padding:4px 10px;border-radius:6px;background:#26272b}.transport input{flex:1}
+
+.col{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;gap:26px;align-items:flex-start}
+.row{display:flex;align-items:baseline;gap:24px;opacity:0}
+.row .stat{font:800 116px/0.9 var(--font-display);letter-spacing:-0.03em;font-variant-numeric:tabular-nums}
+.row .cap{font:600 34px/1 var(--font-body);color:var(--muted)}
+.row.hero .stat{color:var(--accent)}
+</style>
+</head>
+<body>
+  <div id="host"><div class="stage" id="stage">
+    <div class="col">
+      <div class="row hero" id="r1"><div class="stat" id="s1">$0</div><div class="cap">identity recovery</div></div>
+      <div class="row" id="r2"><div class="stat" id="s2">$0</div><div class="cap">cyber extortion</div></div>
+      <div class="row" id="r3"><div class="stat" id="s3">$0</div><div class="cap">online fraud</div></div>
+    </div>
+  </div></div>
+  <div class="transport">
+    <button onclick="playStory()">▶</button><button onclick="pauseStory()">❚❚</button>
+    <input type="range" min="0" max="1000" value="0" oninput="setStoryTime(this.value/1000*STORY_DURATION)">
+    <span id="tc">0.00</span>
+  </div>
+<script>
+const clamp01=u=>Math.max(0,Math.min(1,u));
+const easeOutCubic=u=>1-Math.pow(1-clamp01(u),3);
+const easeInCubic=u=>Math.pow(clamp01(u),3);
+const lerp=(t,a,b,v0,v1,e=easeOutCubic)=>{if(t<=a)return v0;if(t>=b)return v1;return v0+(v1-v0)*e((t-a)/(b-a))};
+const visible=(t,tin,tout,fi=0.4,fo=0.5)=>{if(t<tin||t>tout)return 0;if(t<tin+fi)return easeOutCubic((t-tin)/fi);if(t>tout-fo)return 1-easeInCubic((t-(tout-fo))/fo);return 1};
+const money=v=>'$'+Math.round(v).toLocaleString('en-US');
+
+/* CONFIG */
+const STORY_DURATION=12.0, STORY_FPS=30, STAGE_BG='solid-dark';
+const STORY_BEATS=[
+  {id:'recovery', in:0.4,  out:12.0},   // hero, lands first, stays
+  {id:'extortion',in:3.6,  out:12.0},
+  {id:'fraud',    in:6.6,  out:12.0}
+];
+
+/* RENDER from t — each row uses its beat window; numbers count up on entry */
+const stage=document.getElementById('stage');
+if(STAGE_BG!=='transparent')stage.setAttribute('data-bg',STAGE_BG);
+const rows={r1:document.getElementById('r1'),r2:document.getElementById('r2'),r3:document.getElementById('r3')};
+const stats={s1:document.getElementById('s1'),s2:document.getElementById('s2'),s3:document.getElementById('s3')};
+function beat(id){return STORY_BEATS.find(b=>b.id===id)}
+function row(el,statEl,b,target){
+  const op=visible(t_,b.in,b.out);
+  el.style.opacity=op;
+  el.style.transform=`translateY(${lerp(t_,b.in,b.in+0.5,18,0)}px)`;
+  statEl.textContent=money(lerp(t_,b.in,b.in+1.1,0,target,easeOutCubic));
+}
+let t_=0;
+function render(t){ t_=t;
+  row(rows.r1,stats.s1,beat('recovery'),1000000);
+  row(rows.r2,stats.s2,beat('extortion'),50000);
+  row(rows.r3,stats.s3,beat('fraud'),10000);
+}
+
+/* HARNESS — do not edit */
+let _t=0,_p=false,_r=null,_l=0;
+function setStoryTime(s){_p=false;cancelAnimationFrame(_r);_t=Math.max(0,Math.min(STORY_DURATION,s));render(_t);_tc()}
+function playStory(){if(_p)return;_p=true;_l=performance.now();_lp()}
+function pauseStory(){_p=false;cancelAnimationFrame(_r)}
+function _lp(){const n=performance.now();_t+=(n-_l)/1000;_l=n;if(_t>=STORY_DURATION){_t=STORY_DURATION;render(_t);_p=false;_tc();return}render(_t);_tc();_r=requestAnimationFrame(_lp)}
+function _tc(){const e=document.getElementById('tc');if(e)e.textContent=_t.toFixed(2)}
+window.setStoryTime=setStoryTime;window.playStory=playStory;window.pauseStory=pauseStory;
+window.STORY_DURATION=STORY_DURATION;window.STORY_FPS=STORY_FPS;window.STORY_BEATS=STORY_BEATS;
+function _fit(){stage.style.transform=`scale(${Math.min(innerWidth/1920,innerHeight/1080)})`}addEventListener('resize',_fit);_fit();
+const P=new URLSearchParams(location.search);
+if(P.get('preview')==='1')document.documentElement.setAttribute('data-preview','1');
+const T0=parseFloat(P.get('t'));
+render(0); if(isFinite(T0))setStoryTime(T0); else if(P.get('autoplay')!=='0')playStory();
+window.__storyReady=true;
+</script>
+</body>
+</html>
