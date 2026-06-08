@@ -69,9 +69,10 @@ html,body{
   font-family:var(--font-body); color:var(--text-on-dark);
   -webkit-font-smoothing:antialiased;
 }
-#host{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+/* do not flex-center the stage — it shrinks below 1920 and offsets content */
+#host{ position:fixed; inset:0; overflow:hidden; }
 .stage{
-  position:relative; width:1920px; height:1080px;
+  position:absolute; top:50%; left:50%; width:1920px; height:1080px;
   transform-origin:center center; overflow:hidden;
 }
 /* SOLID clips paint the stage; set via STAGE_BG in CONFIG */
@@ -202,7 +203,7 @@ window.STORY_FPS = STORY_FPS;
 window.STORY_BEATS = STORY_BEATS;
 
 // scale the 1920×1080 stage to fit the viewport
-function _fit(){ const s = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `scale(${s})`; }
+function _fit(){ const s = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `translate(-50%,-50%) scale(${s})`; }
 addEventListener('resize', _fit); _fit();
 
 // URL params: ?t= , ?autoplay=0 , ?preview=1 , ?bg=black|wall|alpha
