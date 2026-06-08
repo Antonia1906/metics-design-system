@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Chapter card — Example</title>
+<!-- ARCHETYPE: chapter divider. A mono "CHAPTER N" kicker + a heavy one-line title,
+     entering → holding → fading to transparent so the card can MASK a hard cut between
+     chapters. ALPHA (transparent) so the fade-out reveals the next shot. ~3.5s.
+     EDIT the values marked {EDIT}.
+
+     STRUCTURE/BEHAVIOR IS THE STANDARD — number-on-top, full-title headline,
+     one-line auto-fit, cut-masking fade exit. The LOOK IS NOT LOCKED: each project
+     may restyle type, accent treatment, and motion flourish. Starting point, not a cage. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#FB411C; --bg-dark:#0A0A0A; --text-on-dark:#FFFFFF; --muted:#9A9CA0;
+  --font-display:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:transparent;font-family:var(--font-display);color:var(--text-on-dark);-webkit-font-smoothing:antialiased}
+/* do not flex-center the stage — it shrinks below 1920 and offsets content */
+#host{position:fixed;inset:0;overflow:hidden}
+.stage{position:absolute;top:50%;left:50%;width:1920px;height:1080px;transform-origin:center center;overflow:hidden}
+.stage[data-bg="solid-dark"]{background:var(--bg-dark)}
+.transport{position:fixed;left:0;right:0;bottom:0;height:42px;display:none;align-items:center;gap:14px;padding:0 16px;z-index:9999;background:rgba(10,10,12,.82);color:#cfd2d6;font:600 13px/1 var(--font-mono)}
+html[data-preview="1"] .transport{display:flex}
+.transport button{all:unset;cursor:pointer;padding:4px 10px;border-radius:6px;background:#26272b}.transport input{flex:1}
+html[data-review="black"] body{background:#000}
+html[data-review="wall"] body{background:radial-gradient(ellipse 80% 60% at 50% 35%,#1c1c1c 0%,#0a0a0a 70%)}
+html[data-review="alpha"] body{background:conic-gradient(#1a1a1a 0% 25%,#242427 25% 50%,#1a1a1a 50% 75%,#242427 75% 100%);background-size:80px 80px}
+
+/* card layout — centered stack, content raised slightly so nothing lands in cell C3 */
+.card{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);text-align:center;width:1728px}
+.kicker{font:700 40px/1 var(--font-mono);letter-spacing:.42em;text-transform:uppercase;color:var(--accent);padding-left:.42em}
+.rule{height:5px;width:96px;margin:26px auto 30px;background:var(--accent);border-radius:3px;transform-origin:center}
+.title{font:900 150px/1.02 var(--font-display);letter-spacing:-.02em;white-space:nowrap;display:inline-block;text-shadow:0 10px 60px rgba(0,0,0,.55)}
+</style>
+</head>
+<body>
+  <div id="host"><div class="stage" id="stage">
+    <div class="card" id="card">
+      <!-- {EDIT} chapter number -->
+      <div class="kicker" id="kicker">CHAPTER 3</div>
+      <div class="rule" id="rule"></div>
+      <!-- {EDIT} chapter title (stays one line — auto-fits down to width) -->
+      <div class="title" id="title">How Identity Theft Actually Happens</div>
+    </div>
+  </div></div>
+
+  <div class="transport">
+    <button onclick="playStory()">&#9654;</button><button onclick="pauseStory()">&#10073;&#10073;</button>
+    <input type="range" min="0" max="1000" value="0" oninput="setStoryTime(this.value/1000*STORY_DURATION)">
+    <span id="tc">0.00</span>
+  </div>
+<script>
+const clamp01=u=>Math.max(0,Math.min(1,u));
+const easeOutCubic=u=>1-Math.pow(1-clamp01(u),3);
+const easeInCubic=u=>Math.pow(clamp01(u),3);
+const easeOutBack=(u,s=1.4)=>{u=clamp01(u);return 1+(s+1)*Math.pow(u-1,3)+s*Math.pow(u-1,2)};
+const lerp=(t,a,b,v0,v1,e=easeOutCubic)=>{if(t<=a)return v0;if(t>=b)return v1;return v0+(v1-v0)*e((t-a)/(b-a))};
+const visible=(t,tin,tout,fi=0.4,fo=0.5)=>{if(t<tin||t>tout)return 0;if(t<tin+fi)return easeOutCubic((t-tin)/fi);if(t>tout-fo)return 1-easeInCubic((t-(tout-fo))/fo);return 1};
+
+/* (1) CONFIG */
+const STORY_DURATION=3.5, STORY_FPS=30, STAGE_BG='transparent';   // ALPHA: fades out to mask the cut
+const STORY_BEATS=[{id:'kicker',in:0.0,out:3.5},{id:'title',in:0.25,out:3.5}];
+
+/* (2) BUILD + RENDER */
+const stage=document.getElementById('stage');
+if(STAGE_BG!=='transparent')stage.setAttribute('data-bg',STAGE_BG);
+const card=document.getElementById('card'),kicker=document.getElementById('kicker'),
+      rule=document.getElementById('rule'),title=document.getElementById('title');
+
+// auto-fit the title to ONE line: shrink font-size until it fits a safe max width.
+// (Layout-only + deterministic — runs before frames are captured, not per-t.)
+const TITLE_MAX_W=1600, TITLE_MAX_PX=150, TITLE_MIN_PX=54;
+function _fitTitle(){
+  let px=TITLE_MAX_PX; title.style.fontSize=px+'px';
+  while(title.scrollWidth>TITLE_MAX_W && px>TITLE_MIN_PX){ px-=3; title.style.fontSize=px+'px'; }
+}
+_fitTitle();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(_fitTitle); // re-fit once webfont lands
+
+function render(t){
+  // kicker: rises + fades in
+  kicker.style.opacity=lerp(t,0.0,0.45,0,1);
+  kicker.style.transform=`translateY(${lerp(t,0.0,0.55,14,0)}px)`;
+  // accent rule: wipes out from center
+  rule.style.transform=`scaleX(${lerp(t,0.15,0.7,0,1,easeOutCubic)})`;
+  // title: staggered ~250ms after kicker, rises + fades in with a touch of overshoot
+  title.style.opacity=lerp(t,0.25,0.8,0,1);
+  title.style.transform=`translateY(${lerp(t,0.25,0.95,26,0,easeOutBack)}px)`;
+  // whole card holds, then fades to transparent over the last 0.6s to mask the hard cut
+  card.style.opacity=visible(t,0.0,STORY_DURATION,0.0,0.6);
+}
+
+/* HARNESS — do not edit */
+let _t=0,_p=false,_r=null,_l=0;
+function setStoryTime(s){_p=false;cancelAnimationFrame(_r);_t=Math.max(0,Math.min(STORY_DURATION,s));render(_t);_tc()}
+function playStory(){if(_p)return;_p=true;_l=performance.now();_lp()}
+function pauseStory(){_p=false;cancelAnimationFrame(_r)}
+function _lp(){const n=performance.now();_t+=(n-_l)/1000;_l=n;if(_t>=STORY_DURATION){_t=STORY_DURATION;render(_t);_p=false;_tc();return}render(_t);_tc();_r=requestAnimationFrame(_lp)}
+function _tc(){const e=document.getElementById('tc');if(e)e.textContent=_t.toFixed(2)}
+window.setStoryTime=setStoryTime;window.playStory=playStory;window.pauseStory=pauseStory;
+window.STORY_DURATION=STORY_DURATION;window.STORY_FPS=STORY_FPS;window.STORY_BEATS=STORY_BEATS;
+function _fit(){stage.style.transform=`translate(-50%,-50%) scale(${Math.min(innerWidth/1920,innerHeight/1080)})`}addEventListener('resize',_fit);_fit();
+const P=new URLSearchParams(location.search);
+if(P.get('preview')==='1')document.documentElement.setAttribute('data-preview','1');
+if(P.get('bg'))document.documentElement.setAttribute('data-review',P.get('bg'));
+const T0=parseFloat(P.get('t'));
+render(0); if(isFinite(T0))setStoryTime(T0); else if(P.get('autoplay')!=='0')playStory();
+window.__storyReady=true;
+</script>
+</body>
+</html>
